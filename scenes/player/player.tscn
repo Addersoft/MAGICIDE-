@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/camera/player_camera.gd" id="3"]
@@ -11,6 +11,8 @@
 [ext_resource type="Script" path="res://scripts/runes/rune_billboard.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/broom/broom_controller.gd" id="11"]
 [ext_resource type="Script" path="res://scripts/camera/broom_camera.gd" id="12"]
+[ext_resource type="Script" path="res://scripts/movement/traversal_probe.gd" id="13"]
+[ext_resource type="Script" path="res://scripts/movement/parkour_motor.gd" id="14"]
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius=0.35
 height=1.8
@@ -78,3 +80,8 @@ visible=false
 transform=Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 0, 0)
 mesh=SubResource("RuneBox")
 visible=false
+
+[node name="TraversalProbe" type="Node" parent="."]
+script=ExtResource("13")
+[node name="ParkourMotor" type="Node" parent="."]
+script=ExtResource("14")

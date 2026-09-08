@@ -57,3 +57,8 @@ func crouch_toggled() -> bool:
 	var pressed: bool = held and not _crouch_chord_down
 	_crouch_chord_down = held
 	return controls_active and pressed
+
+func reset_for_respawn() -> void:
+	# Keep pointer released; a conscious click resumes play without firing.
+	set_capture(false)
+	_crouch_chord_down = Input.is_action_pressed("crouch_modifier") and Input.is_action_pressed("move_backward")

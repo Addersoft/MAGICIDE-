@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 [ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/actors/dummy_controller.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/combat/knockback_component.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/actors/respawn_controller.gd" id="4"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color=Color(0.9,0.38,0.16,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -31,3 +32,6 @@ font_size=48
 
 [node name="Knockback" type="Node" parent="."]
 script=ExtResource("3")
+
+[node name="Respawn" type="Node" parent="."]
+script=ExtResource("4")

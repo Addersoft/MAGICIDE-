@@ -30,3 +30,10 @@ func toggle() -> bool:
 	collider.position.y = height / 2.0
 	view.set_eye_height(0.85 if crouched else 1.65)
 	return true
+
+func reset_standing() -> void:
+	# Respawn owner has already validated the full standing capsule at the spawn.
+	crouched = false
+	collider.shape.height = STANDING_HEIGHT
+	collider.position.y = STANDING_HEIGHT / 2.0
+	view.set_eye_height(1.65)

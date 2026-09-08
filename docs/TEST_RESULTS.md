@@ -43,3 +43,14 @@ Total: 62 assertions. M05 rerun after adding boundary fixture; both runs exited 
 Not tested: GPU output, manual camera/aim feel, target-PC focus handling, render-cap comparison,
 network behavior or executable export. The shot test dispatches mouse events to the input handler;
 it does not simulate a physical OS pointer or establish interactive graphics correctness.
+
+## M06 v0.6.0
+Linux headless Godot 4.5 stable official 876b29033: editor import exit 0, no parser errors.
+All 62 earlier checks pass; M06 adds 22 passing checks, total 84, all runners exit 0.
+M06 covers one death/schedule, delay/no early return, health/location/velocity/posture/aim/eye reset,
+ready combat, explicit recapture, fast cooldown/impulse reset, repeated cycles/node count, blocked
+spawn UI/clearance recovery, standing shape after crouched death, dummy reset and clean scene reload.
+Initial M06 run had two assertion failures due to exact float comparisons of engine-stored 1.8/1.65
+values; tests changed to approximate comparison without changing production reset behavior. Rerun
+passed; extra fast-cooldown/impulse assertions also passed in final M06 run.
+No graphical/comfort, OS focus/capture, frame-cap comparison or executable export verified.

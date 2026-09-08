@@ -17,3 +17,10 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	knockback.finish_step(self, delta)
+
+func reset_for_respawn(spawn: Transform3D) -> void:
+	global_transform = spawn
+	velocity = Vector3.ZERO
+	knockback.horizontal = Vector3.ZERO
+	$Health.reset_full()
+	reset_physics_interpolation()

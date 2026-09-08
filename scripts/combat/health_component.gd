@@ -23,3 +23,9 @@ func apply_damage(amount: float) -> float:
 	if lethal:
 		died.emit()
 	return applied
+
+func reset_full() -> void:
+	# Lifecycle-only: callers must reset physical/action state before restoring health.
+	is_dead = false
+	current_health = max_health
+	health_changed.emit(current_health, max_health)

@@ -43,3 +43,15 @@ Collision normals remove blocked external velocity after motion. Dead bodies can
 Dummy changed from StaticBody3D to CharacterBody3D because it now receives physical movement.
 Layer 1 = world; layer 2 = actors; actors use mask 3; attack ray uses mask 3 and excludes caster.
 PlayerPosture standing queries automatically inherit the actor mask and therefore include the dummy.
+
+M06: each actor contains RespawnController, which stores its initial transform and a duplicate of
+the original standing collider. It owns a single waiting/countdown state, not a SceneTree timer.
+At expiry it checks that shape against actor mask 3, excluding the actor's RID. Retry every .25 s
+if blocked. Successful reset calls actor.reset_for_respawn(spawn) in physics; the actor remains the
+same node, so scene-local HUD references and health subscriptions stay valid. No duplicate actors.
+
+The actor resets transform/velocity/external impulse, player posture/view/input/combat, then calls
+Health.reset_full last. Health owns the actual HP/dead mutation. Combat reset clears cooldown and
+pending shot and emits presentation reset. Respawn emits respawned after reset. Physics interpolation
+history resets on teleport. Dead colliders remain until the in-place reset. Ready state does not
+recapture the mouse; a deliberate click does, without an attack. Scene destruction owns all lifetime.

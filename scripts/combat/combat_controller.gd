@@ -1,5 +1,6 @@
 extends Node
 ## Local M05 attack authority. Rune dispatch and networking are future milestones.
+signal combat_reset
 signal shot_resolved(hit_position: Vector3, damage: float)
 const TAG_DAMAGE: float = 12.0
 const TAG_COOLDOWN: float = 2.0
@@ -54,3 +55,8 @@ func _physics_process(delta: float) -> void:
 				if applied > 0.0 and target.has_method("apply_knockback"):
 					target.apply_knockback(direction * KNOCKBACK_SPEED)
 	shot_resolved.emit(endpoint, applied)
+
+func reset_for_respawn() -> void:
+	_pending = false
+	cooldown_remaining = 0.0
+	combat_reset.emit()

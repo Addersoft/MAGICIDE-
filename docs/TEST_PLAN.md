@@ -56,3 +56,16 @@ Run tests/m05_smoke.gd and the earlier fixtures. Manual PC checks:
 - At 30/60/144 render caps with physics fixed at 60 Hz, compare cooldown and push distance.
 Likely failure points: eye-origin aiming near cover, narrow collider hit regions, controller/impulse
 mixing, OS mouse capture. Report exact reproduction, engine version, hardware and debugger output.
+
+## M06 current acceptance (supersedes older stop/run-to-reset instructions)
+Run m06_smoke.gd plus prior fixtures. In F5 play:
+- H four times: player dies, controls release; countdown reaches respawn at about 3 s.
+- Player returns to initial spawn at 100 HP, standing with original aim and no drift; click resumes
+  without firing. Tag is ready. Repeat while crouched, jumping and moving.
+- Kill dummy with Tag or J; it returns at 100 HP to its starting point after 3 s.
+- Stand at dummy's starting point after killing it: it should wait with a blocked message.
+  Move aside: the next clearance retry lets it respawn.
+- Repeat deaths and restart while a respawn is pending; no duplicate actors, stale HUD or errors.
+- Check pointer focus and camera reset visually. No camera transition to third person is permitted.
+Automated tests include a shortened .05 s fixture for rapid cycles/unexpired cooldown reset;
+the normal 3 s default is tested separately. The delay is an inspector-tunable prototype choice.

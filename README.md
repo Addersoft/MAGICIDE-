@@ -1,6 +1,6 @@
-# WIZARDS! — M05 v0.5.0
-PC Godot source project. Includes M01–M05: FPS movement, jump/sprint/crouch, health,
-Sniper Tag and knockback. Not an HTML game or exported executable.
+# WIZARDS! — M06 v0.6.0
+PC Godot source project. Includes M01–M06: FPS movement, jump/sprint/crouch, health,
+Sniper Tag, knockback and automatic respawn. Not an HTML game or exported executable.
 
 ## Run
 1. Download the standard Godot **4.5 stable** editor:
@@ -34,7 +34,8 @@ Hits push the dummy in the shot direction. Horizontal push decays and collides w
 player input does not erase external knockback. A lethal hit can still push the target.
 The dummy does not attack. Both actors have 100 HP. Nine full Tag hits kill the dummy;
 the last reports only HP actually removed. Dead targets take no further damage or impulse.
-At player death controls lock; **stop/run to reset**. Respawn is scheduled for M06.
+At player death controls lock. Both actors respawn after **3 seconds** if their spawn is clear.
+Click to resume after player respawn; the click does not shoot.
 
 Crouch uses a 1 m capsule and .85 m eye; standing uses 1.8 m and 1.65 m. Eye height snaps
 with collider to avoid clipping under roofs. Blocked standing requires retry after moving clear.
@@ -42,7 +43,7 @@ Ctrl+S reserves S from backward input while Ctrl is held. Crouch adds no speed p
 Walk 6 m/s; sprint 9 m/s; jump launch 7 m/s; gravity 20 m/s². These remain tunable baselines.
 
 ## Verification
-Godot 4.5 stable Linux headless: editor import and 62 checks pass across M01–M05 fixtures.
+Godot 4.5 stable Linux headless: editor import and 84 checks pass across M01–M06 fixtures.
 No GPU rendering, camera comfort, target-PC mouse/focus, exported executable, or render-cap
 comparison is confirmed. See docs/TEST_RESULTS.md and docs/TEST_PLAN.md.
 
@@ -54,12 +55,24 @@ godot --headless --path . --script res://tests/m02_smoke.gd
 godot --headless --path . --script res://tests/m03_smoke.gd
 godot --headless --path . --script res://tests/m04_smoke.gd
 godot --headless --path . --script res://tests/m05_smoke.gd
+godot --headless --path . --script res://tests/m06_smoke.gd
 ```
 Each runner should report zero failures and exit 0. Manual testing remains necessary.
 
 ## Continue
-Read docs/PROJECT_STATE.md first. Next milestone: **M06 death/respawn lifecycle**, after feedback.
+Read docs/PROJECT_STATE.md first. Next milestone: **M07 round timer and first-slice integration**, after feedback.
 Round timer M07; then rune proof; then broom. Runes and broom are not implemented.
 Git baseline/history is included as git-baseline.bundle; reconstruct with:
 `git clone git-baseline.bundle wizards-dev`. Use either that clone or extracted source as your
 working copy, not two independently edited copies. Engine caches are excluded from the ZIP.
+
+## M06 lifecycle
+On death, one per-actor respawn schedule starts. After 3 seconds the full standing capsule is
+checked at that actor's original spawn. If occupied, the actor remains dead, the HUD explains why,
+and clearance is retried every 0.25 seconds. Move out of the dummy's spawn to let it return.
+There is no alternative spawn selector yet. The current static arena supplies the spawn floor.
+
+Respawn restores 100 HP, standing posture, original location, FPS aim and eye height, zero velocity,
+zero external impulse, and a ready Tag with no queued shot. Input remains released so the game
+does not steal focus. Click to resume; held inputs may then move you normally. Dead actor visuals
+and collision persist during the delay; no ragdoll or spawn protection is introduced.

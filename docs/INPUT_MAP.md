@@ -31,3 +31,7 @@ M04 debug-only: H = 25 self damage; J = 25 dummy damage. Requires captured contr
 M05: primary_fire = left mouse. Central input owns firing; first click after release only captures.
 Ctrl+LMB is reserved for Link and suppressed. Combat rejects clicks during cooldown; does not buffer
 them or auto-fire while held. Death/focus/capture loss cancel pending shots before physics execution.
+
+M06: player respawns after 3 s when spawn is clear; click to resume after respawn, not to shoot.
+No reset key added. H/J test damage remains available while alive. Original spawn is used for each
+actor. Blocked spawn waits; standing reset never recaptures focus automatically.

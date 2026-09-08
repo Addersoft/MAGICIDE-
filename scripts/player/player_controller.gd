@@ -44,3 +44,14 @@ func apply_knockback(impulse: Vector3) -> void:
 		return
 	knockback.add_impulse(impulse)
 	velocity.y += impulse.y
+
+func reset_for_respawn(spawn: Transform3D) -> void:
+	global_transform = spawn
+	velocity = Vector3.ZERO
+	knockback.horizontal = Vector3.ZERO
+	posture.reset_standing()
+	view.rotation = Vector3.ZERO
+	player_input.reset_for_respawn()
+	$Combat.reset_for_respawn()
+	health.reset_full()
+	reset_physics_interpolation()

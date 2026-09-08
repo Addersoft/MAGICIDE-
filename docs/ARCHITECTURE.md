@@ -55,3 +55,14 @@ Health.reset_full last. Health owns the actual HP/dead mutation. Combat reset cl
 pending shot and emits presentation reset. Respawn emits respawned after reset. Physics interpolation
 history resets on teleport. Dead colliders remain until the in-place reset. Ready state does not
 recapture the mouse; a deliberate click does, without an attack. Scene destruction owns all lifetime.
+
+M07 RoundManager owns 180 s remaining time, ended latch and one deferred restart request. Physics
+priority -100 resolves expiry before actor priority 0, so a final-tick queued shot/respawn cannot run
+after expiry. End disables gameplay capture and damage and disables processing on both actor subtrees.
+HUD/root continue processing; the SceneTree is not globally paused. Collision bodies remain in place.
+
+RoundHUD owns clock/overlay/button presentation and invokes manager.restart_round; no gameplay
+arithmetic in UI. Restart reloads the complete current scene (not a patchwork of actor resets), restoring
+arena/actors/subscriptions/timers from source. Repeated restart requests are coalesced until reload.
+Health has a damage_enabled gate for ended-round direct calls; new scene resets it to true.
+PlayerInput gameplay_enabled gate prevents recapture of controls after time expires.

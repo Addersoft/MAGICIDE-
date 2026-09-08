@@ -4,6 +4,7 @@ signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
 var controls_active: bool = false
+var gameplay_enabled: bool = true
 var _discard_motion: bool = false
 var _crouch_chord_down: bool = false
 
@@ -11,7 +12,7 @@ func _ready() -> void:
 	set_capture(true)
 
 func set_capture(captured: bool) -> void:
-	if captured and get_parent().get_node("Health").is_dead:
+	if captured and (not gameplay_enabled or get_parent().get_node("Health").is_dead):
 		return
 	controls_active = captured
 	_discard_motion = captured

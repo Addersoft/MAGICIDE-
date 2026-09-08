@@ -10,6 +10,9 @@ func _shot(_position: Vector3, damage: float) -> void:
 	last_result = "HIT — %.0f damage" % damage if damage > 0.0 else "No damage"
 
 func _process(_delta: float) -> void:
+	if not combat.controls.gameplay_enabled:
+		text = "SNIPER TAG  |  Round ended"
+		return
 	if combat.health.is_dead:
 		text = "SNIPER TAG  |  Disabled while dead"
 		return

@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 [ext_resource type="PackedScene" path="res://scenes/arenas/arena_graybox.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/actors/dummy.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/debug/damage_testbed.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/ui/combat_status.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/match/round_manager.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/ui/round_hud.gd" id="7"]
 [sub_resource type="Environment" id="Environment"]
 background_mode=1
 background_color=Color(0.08,0.11,0.16,1)
@@ -22,6 +24,7 @@ shadow_enabled=true
 [node name="Player" parent="." instance=ExtResource("2")]
 position=Vector3(0,0.1,8)
 [node name="HUD" type="CanvasLayer" parent="."]
+script=ExtResource("7")
 [node name="Instructions" type="Label" parent="HUD"]
 offset_left=24.0
 offset_top=20.0
@@ -33,7 +36,7 @@ theme_override_colors/font_shadow_color=Color(0,0,0,1)
 theme_override_constants/shadow_offset_x=2
 theme_override_constants/shadow_offset_y=2
 theme_override_font_sizes/font_size=20
-text="WIZARDS!  /  M06 • v0.6.0
+text="WIZARDS!  /  M07 • v0.7.0
 WASD  Move     Mouse  Look     Esc  Release     Click  Capture
 Space  Jump     Hold Shift  Sprint     Ctrl+S  Toggle crouch"
 [node name="Crosshair" type="Label" parent="HUD"]
@@ -78,3 +81,62 @@ offset_bottom=255.0
 mouse_filter=2
 theme_override_font_sizes/font_size=20
 script=ExtResource("5")
+
+[node name="RoundManager" type="Node" parent="."]
+script=ExtResource("6")
+[node name="RoundClock" type="Label" parent="HUD"]
+anchor_left=1.0
+anchor_right=1.0
+offset_left=-170.0
+offset_top=24.0
+offset_right=-24.0
+offset_bottom=70.0
+theme_override_font_sizes/font_size=32
+horizontal_alignment=2
+mouse_filter=2
+text="03:00"
+[node name="RoundEnd" type="Control" parent="HUD"]
+visible=false
+layout_mode=3
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+[node name="Shade" type="ColorRect" parent="HUD/RoundEnd"]
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+color=Color(0.02,0.03,0.05,0.86)
+mouse_filter=2
+[node name="Panel" type="Panel" parent="HUD/RoundEnd"]
+anchors_preset=8
+anchor_left=0.5
+anchor_top=0.5
+anchor_right=0.5
+anchor_bottom=0.5
+offset_left=-230.0
+offset_top=-115.0
+offset_right=230.0
+offset_bottom=115.0
+[node name="Title" type="Label" parent="HUD/RoundEnd/Panel"]
+offset_left=20.0
+offset_top=24.0
+offset_right=440.0
+offset_bottom=66.0
+horizontal_alignment=1
+theme_override_font_sizes/font_size=30
+text="ROUND COMPLETE"
+[node name="Description" type="Label" parent="HUD/RoundEnd/Panel"]
+offset_left=20.0
+offset_top=80.0
+offset_right=440.0
+offset_bottom=120.0
+horizontal_alignment=1
+text="Time expired. Restart for another practice round."
+[node name="Restart" type="Button" parent="HUD/RoundEnd/Panel"]
+offset_left=100.0
+offset_top=145.0
+offset_right=360.0
+offset_bottom=197.0
+text="Restart round"

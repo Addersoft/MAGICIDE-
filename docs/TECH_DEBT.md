@@ -13,3 +13,8 @@
 - No persistent sensitivity settings; inspector only. Eye crouch snaps for clearance safety.
 - No actual PC graphical/comfort/focus validation. Manual acceptance remains pending.
 - No audio/tracer/wand art for Tag; text feedback is the M05 presentation placeholder.
+
+- M07 export not verified: matching templates unavailable in runtime; Linux/Windows presets supplied.
+- Practice rounds have a timer only. Team scoring/best-of-three remain later match work, not implied
+  by the round-end overlay. Full current-scene reload is the bounded M07 restart implementation.
+- Gate A ten-minute real playtest not yet reported; headless checks cannot establish feel or rendering.

@@ -1,6 +1,6 @@
-# WIZARDS! — M06 v0.6.0
-PC Godot source project. Includes M01–M06: FPS movement, jump/sprint/crouch, health,
-Sniper Tag, knockback and automatic respawn. Not an HTML game or exported executable.
+# WIZARDS! — M07 v0.7.0
+PC Godot source project. Includes M01–M07: FPS movement, jump/sprint/crouch, health,
+Sniper Tag, knockback, automatic respawn and timed practice rounds. Not an HTML game or exported executable.
 
 ## Run
 1. Download the standard Godot **4.5 stable** editor:
@@ -43,7 +43,7 @@ Ctrl+S reserves S from backward input while Ctrl is held. Crouch adds no speed p
 Walk 6 m/s; sprint 9 m/s; jump launch 7 m/s; gravity 20 m/s². These remain tunable baselines.
 
 ## Verification
-Godot 4.5 stable Linux headless: editor import and 84 checks pass across M01–M06 fixtures.
+Godot 4.5 stable Linux headless: editor import and 101 checks pass across M01–M07 fixtures.
 No GPU rendering, camera comfort, target-PC mouse/focus, exported executable, or render-cap
 comparison is confirmed. See docs/TEST_RESULTS.md and docs/TEST_PLAN.md.
 
@@ -56,12 +56,12 @@ godot --headless --path . --script res://tests/m03_smoke.gd
 godot --headless --path . --script res://tests/m04_smoke.gd
 godot --headless --path . --script res://tests/m05_smoke.gd
 godot --headless --path . --script res://tests/m06_smoke.gd
+godot --headless --path . --script res://tests/m07_smoke.gd
 ```
 Each runner should report zero failures and exit 0. Manual testing remains necessary.
 
 ## Continue
-Read docs/PROJECT_STATE.md first. Next milestone: **M07 round timer and first-slice integration**, after feedback.
-Round timer M07; then rune proof; then broom. Runes and broom are not implemented.
+Read docs/PROJECT_STATE.md first. Next: **Gate A playtest and standalone export verification** before rune proof and broom. Runes and broom are not implemented.
 Git baseline/history is included as git-baseline.bundle; reconstruct with:
 `git clone git-baseline.bundle wizards-dev`. Use either that clone or extracted source as your
 working copy, not two independently edited copies. Engine caches are excluded from the ZIP.
@@ -76,3 +76,20 @@ Respawn restores 100 HP, standing posture, original location, FPS aim and eye he
 zero external impulse, and a ready Tag with no queued shot. Input remains released so the game
 does not steal focus. Click to resume; held inputs may then move you normally. Dead actor visuals
 and collision persist during the delay; no ragdoll or spawn protection is introduced.
+
+## M07 practice rounds
+The round starts immediately and lasts 3 minutes of simulation time. Escape releases the mouse but
+does not pause the timer. At 00:00, gameplay stops, pending attacks/respawns stop, and the pointer is
+released. Click **Restart round** (or activate its focused button with the keyboard) for a fresh round.
+The arena, actors, health, movement, camera, cooldowns and pending respawns all reset by scene reload.
+No winner/team score is invented for this single-player dummy practice slice.
+
+The first-slice feature list is now implemented, but Gate A is **not yet accepted**: a real ten-minute
+playtest, target-PC graphics/input checks and a standalone PC executable run remain pending.
+
+## Export on your PC
+Linux and Windows Desktop x86_64 presets are included in export_presets.cfg. In Godot 4.5 stable,
+install the matching export templates through **Editor > Manage Export Templates**, create an
+`exports` folder, then use **Project > Export**, choose a preset and Export Project (release).
+Keep this source ZIP as the reproducible baseline. Export presets have not produced a verified
+executable here: template download failed and the Linux export attempt reported missing templates.

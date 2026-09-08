@@ -13,7 +13,9 @@ func _ready() -> void:
 func _refresh(_current: float, _maximum: float) -> void:
 	var hp = player.get_node("Health")
 	status.text = "Player: %.0f / %.0f    Dummy: %.0f / %.0f" % [hp.current_health,hp.max_health,dummy_health.current_health,dummy_health.max_health]
-	if hp.is_dead:
+	if not player.player_input.gameplay_enabled:
+		status.text += "\nRound ended"
+	elif hp.is_dead:
 		status.text += "\nDEAD — " + player.get_node("Respawn").status_text()
 	elif not player.player_input.controls_active:
 		status.text += "\nClick to resume"

@@ -69,3 +69,16 @@ Run m06_smoke.gd plus prior fixtures. In F5 play:
 - Check pointer focus and camera reset visually. No camera transition to third person is permitted.
 Automated tests include a shortened .05 s fixture for rapid cycles/unexpired cooldown reset;
 the normal 3 s default is tested separately. The delay is an inspector-tunable prototype choice.
+
+## M07 / Gate A acceptance
+Run m07_smoke.gd and earlier fixtures. On PC:
+- Play a full 3-minute round: clock reaches 00:00 once; movement/shooting/debug damage stop.
+- End overlay is readable; pointer releases. Restart button works with mouse/keyboard.
+- Restart restores arena, 100 HP actors at original spawns, posture/aim, ready Tag and no old respawns.
+- Repeat restart during the test session; no duplicate actors or stale HUD.
+- Ten-minute manual playtest with movement, crouch, jump, shooting, deaths/respawns and multiple
+  rounds. Record OS/hardware/FPS/engine/debugger results. Headless fixtures do not replace this.
+- Export with matching 4.5 stable templates and included Linux/Windows presets; run standalone.
+- Gate A remains pending until visual/comfort checks, clean import and standalone execution pass.
+The M07 automated fixture tests real scene reload plus near-expiry timing; it does not wait the full
+three-minute wall-clock duration. Manual full-round timing remains explicitly pending.

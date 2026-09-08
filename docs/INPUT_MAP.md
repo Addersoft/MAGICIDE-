@@ -35,3 +35,7 @@ them or auto-fire while held. Death/focus/capture loss cancel pending shots befo
 M06: player respawns after 3 s when spawn is clear; click to resume after respawn, not to shoot.
 No reset key added. H/J test damage remains available while alive. Original spawn is used for each
 actor. Blocked spawn waits; standing reset never recaptures focus automatically.
+
+M07: RoundEnd Restart button is clickable/focused and uses standard Godot UI activation. No new
+combat key assigned. At round end pointer releases and gameplay cannot be recaptured. Restart
+reloads scene and uses normal initial capture. Escape during play does not pause the round clock.

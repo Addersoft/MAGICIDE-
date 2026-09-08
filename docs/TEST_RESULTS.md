@@ -54,3 +54,15 @@ Initial M06 run had two assertion failures due to exact float comparisons of eng
 values; tests changed to approximate comparison without changing production reset behavior. Rerun
 passed; extra fast-cooldown/impulse assertions also passed in final M06 run.
 No graphical/comfort, OS focus/capture, frame-cap comparison or executable export verified.
+
+## M07 v0.7.0
+Godot 4.5 stable official 876b29033 Linux headless. Editor import exit 0. All earlier 84 checks pass.
+M07 17 checks pass, exit 0; total 101. Includes default 180 s, one-second decrement, end exactly once,
+shot/respawn expiry ordering, pointer release/recapture lock, damage rejection, frozen movement,
+end overlay/clock, real restart button/scene reload, restored actors/positions/state and stable nodes.
+Near-expiry fixture accelerates testing by setting remaining to .005; no full-duration playtest claimed.
+Standalone export remains blocked: template download unavailable (HTTP 501); no executable validated.
+Graphical/OS input, ten-minute manual playtest and target hardware performance remain pending.
+Fresh-copy verification: copied source without .godot/.git into a clean directory; editor import
+exit 0 and main-scene headless launch for 120 frames exit 0. Linux release export attempt exit 1,
+explicitly reporting missing 4.5.stable export templates; no executable delivered.

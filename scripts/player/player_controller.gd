@@ -56,17 +56,18 @@ func _broom_physics(delta: float) -> void:
 		motor.reset()
 	var axis: Vector2 = player_input.fly_axis()
 	var vertical: float = player_input.fly_vertical()
-	velocity = broom.integrate(delta, velocity, view.horizontal_basis(), axis, vertical, knockback.horizontal)
+	var boost: bool = player_input.boost_held()
+	velocity = broom.integrate(delta, velocity, view.horizontal_basis(), axis, vertical, knockback.horizontal, boost)
 	move_and_slide()
 	knockback.finish_step(self, delta)
 	broom.update_visual(delta, axis)
 
 func _foot_physics(delta: float) -> void:
-	# ParkourMotor owns horizontal momentum, wall-run, vault, glide, Q/E roll, coyote, etc.
-	var crouch_pressed: bool = player_input.crouch_toggled()
-	if crouch_pressed and not posture.sliding:
+	# Tap Ctrl (stationary) = crouch toggle. Hold Ctrl while moving = slide.
+	var crouch_tap: bool = player_input.crouch_toggled()
+	if crouch_tap and not posture.sliding:
 		posture.toggle()
-	var desired: Vector3 = motor.step(delta, crouch_pressed)
+	var desired: Vector3 = motor.step(delta, crouch_tap)
 	velocity.x = desired.x + knockback.horizontal.x
 	velocity.y = desired.y
 	velocity.z = desired.z + knockback.horizontal.z

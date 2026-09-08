@@ -67,7 +67,7 @@ func _foot_physics(delta: float) -> void:
 	var planar: float = Vector2(velocity.x, velocity.z).length()
 	var moving: bool = axis.length() > 0.2 or planar > 3.5
 	if player_input.slide_requested() and is_on_floor() and moving:
-		var dir := view.horizontal_basis() * Vector3(axis.x, 0.0, axis.y)
+		var dir: Vector3 = view.horizontal_basis() * Vector3(axis.x, 0.0, axis.y)
 		if dir.length() < 0.15:
 			dir = Vector3(velocity.x, 0.0, velocity.z)
 		if dir.length() < 0.15:

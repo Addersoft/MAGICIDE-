@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 [ext_resource type="PackedScene" path="res://scenes/arenas/arena_graybox.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/actors/dummy.tscn" id="3"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/ui/combat_status.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/match/round_manager.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/round_hud.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/ui/rune_hud.gd" id="8"]
 [sub_resource type="Environment" id="Environment"]
 background_mode=1
 background_color=Color(0.08,0.11,0.16,1)
@@ -28,7 +29,7 @@ script=ExtResource("7")
 [node name="Instructions" type="Label" parent="HUD"]
 offset_left=24.0
 offset_top=20.0
-offset_right=850.0
+offset_right=1100.0
 offset_bottom=110.0
 mouse_filter=2
 theme_override_colors/font_color=Color(0.9,0.95,1,1)
@@ -36,9 +37,10 @@ theme_override_colors/font_shadow_color=Color(0,0,0,1)
 theme_override_constants/shadow_offset_x=2
 theme_override_constants/shadow_offset_y=2
 theme_override_font_sizes/font_size=20
-text="WIZARDS!  /  M07 • v0.7.0
+text="WIZARDS!  /  M08 • v0.8.0
 WASD  Move     Mouse  Look     Esc  Release     Click  Capture
-Space  Jump     Hold Shift  Sprint     Ctrl+S  Toggle crouch"
+Space  Jump     Hold Shift  Sprint     Ctrl+S  Toggle crouch
+1  Kenaz     C  Clear queue     Empty LMB  Tag     Queued LMB  Cast"
 [node name="Crosshair" type="Label" parent="HUD"]
 anchors_preset=8
 anchor_left=0.5
@@ -58,26 +60,35 @@ horizontal_alignment=1
 position=Vector3(3,0,2)
 [node name="HealthStatus" type="Label" parent="HUD"]
 offset_left=24.0
-offset_top=140.0
+offset_top=168.0
 offset_right=1100.0
-offset_bottom=210.0
+offset_bottom=238.0
 mouse_filter=2
 theme_override_font_sizes/font_size=20
 [node name="DamageInstructions" type="Label" parent="HUD"]
 offset_left=24.0
-offset_top=110.0
+offset_top=138.0
 offset_right=1100.0
-offset_bottom=140.0
+offset_bottom=168.0
 mouse_filter=2
 text="M04 TEST CONTROLS: H = hurt player 25 HP    J = hurt dummy 25 HP"
 [node name="DamageTestbed" type="Node" parent="."]
 script=ExtResource("4")
 
+[node name="RuneStatus" type="Label" parent="HUD"]
+offset_left=24.0
+offset_top=248.0
+offset_right=1100.0
+offset_bottom=280.0
+mouse_filter=2
+theme_override_font_sizes/font_size=20
+script=ExtResource("8")
+
 [node name="CombatStatus" type="Label" parent="HUD"]
 offset_left=24.0
-offset_top=220.0
+offset_top=280.0
 offset_right=1100.0
-offset_bottom=255.0
+offset_bottom=320.0
 mouse_filter=2
 theme_override_font_sizes/font_size=20
 script=ExtResource("5")

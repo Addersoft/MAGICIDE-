@@ -1,20 +1,25 @@
 extends Node
-## Local M05 attack authority. Rune dispatch and networking are future milestones.
+## Local attack authority. Empty queue is Tag; Kenaz-only queues are the M08 spell.
 signal combat_reset
 signal shot_resolved(hit_position: Vector3, damage: float)
+signal cast_failed(reason: String)
 const TAG_DAMAGE: float = 12.0
 const TAG_COOLDOWN: float = 2.0
 const QUERY_RANGE: float = 1000.0 # Covers the bounded 40 m arena; no damage falloff.
 const KNOCKBACK_SPEED: float = 5.0
 var cooldown_remaining: float = 0.0
+var last_kind: String = "tag"
 var _pending: bool = false
 @onready var actor: CharacterBody3D = get_parent()
 @onready var health = actor.get_node("Health")
 @onready var controls = actor.get_node("PlayerInput")
 @onready var camera: Camera3D = actor.get_node("View/Camera3D")
+@onready var rune_queue = actor.get_node("RuneQueue")
 
 func _ready() -> void:
 	controls.primary_requested.connect(request_tag)
+	controls.rune_insert_requested.connect(_insert)
+	controls.rune_clear_requested.connect(_clear)
 	controls.capture_changed.connect(_capture_changed)
 	health.died.connect(_cancel)
 
@@ -22,6 +27,16 @@ func request_tag() -> void:
 	if health.is_dead or not controls.controls_active or cooldown_remaining > 0.0:
 		return
 	_pending = true
+
+func _insert(index: int) -> void:
+	if health.is_dead or not controls.controls_active:
+		return
+	rune_queue.insert_bind(index)
+
+func _clear() -> void:
+	if health.is_dead or not controls.controls_active:
+		return
+	rune_queue.clear()
 
 func _cancel() -> void:
 	_pending = false
@@ -37,6 +52,14 @@ func _physics_process(delta: float) -> void:
 	_pending = false
 	if health.is_dead or not controls.controls_active or cooldown_remaining > 0.0:
 		return
+	var recipe: Dictionary = SpellCatalog.resolve(rune_queue.snapshot())
+	var kind: String = str(recipe.get("kind", "unsupported"))
+	if kind == "unsupported":
+		cast_failed.emit("unsupported mix")
+		return
+	if kind != "tag":
+		rune_queue.consume()
+	last_kind = kind
 	cooldown_remaining = TAG_COOLDOWN
 	var origin: Vector3 = camera.global_position
 	var direction: Vector3 = -camera.global_basis.z
@@ -45,13 +68,14 @@ func _physics_process(delta: float) -> void:
 	query.hit_from_inside = true
 	var hit: Dictionary = actor.get_world_3d().direct_space_state.intersect_ray(query)
 	var applied: float = 0.0
+	var damage: float = float(recipe.get("damage", TAG_DAMAGE))
 	if not hit.is_empty():
 		endpoint = hit.position
 		var target = hit.collider
 		if target is Node:
 			var target_health = target.get_node_or_null("Health")
 			if target_health != null and target_health.has_method("apply_damage"):
-				applied = target_health.apply_damage(TAG_DAMAGE)
+				applied = target_health.apply_damage(damage)
 				if applied > 0.0 and target.has_method("apply_knockback"):
 					target.apply_knockback(direction * KNOCKBACK_SPEED)
 	shot_resolved.emit(endpoint, applied)
@@ -59,4 +83,6 @@ func _physics_process(delta: float) -> void:
 func reset_for_respawn() -> void:
 	_pending = false
 	cooldown_remaining = 0.0
+	last_kind = "tag"
+	rune_queue.clear()
 	combat_reset.emit()

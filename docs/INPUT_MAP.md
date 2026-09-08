@@ -39,3 +39,7 @@ actor. Blocked spawn waits; standing reset never recaptures focus automatically.
 M07: RoundEnd Restart button is clickable/focused and uses standard Godot UI activation. No new
 combat key assigned. At round end pointer releases and gameplay cannot be recaptured. Restart
 reloads scene and uses normal initial capture. Escape during play does not pause the round clock.
+
+M08: rune_1 / rune_2 / rune_3 = physical 1/2/3. rune_clear = C. Only bind 1 is Kenaz in this
+slice; 2 and 3 no-op. Inserts require captured living controls. C does not shoot. Empty LMB is
+still Tag. Queued LMB is a cast. Ctrl+LMB remains reserved.

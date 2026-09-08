@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/camera/player_camera.gd" id="3"]
@@ -7,9 +7,13 @@
 [ext_resource type="Script" path="res://scripts/combat/knockback_component.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/combat/combat_controller.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/actors/respawn_controller.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/runes/rune_queue.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/runes/rune_billboard.gd" id="10"]
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius=0.35
 height=1.8
+[sub_resource type="BoxMesh" id="RuneBox"]
+size=Vector3(0.18, 0.18, 0.04)
 [node name="Player" type="CharacterBody3D"]
 collision_layer=2
 collision_mask=3
@@ -41,3 +45,21 @@ script=ExtResource("7")
 
 [node name="Respawn" type="Node" parent="."]
 script=ExtResource("8")
+
+[node name="RuneQueue" type="Node" parent="."]
+script=ExtResource("9")
+
+[node name="RuneBillboard" type="Node3D" parent="."]
+position=Vector3(0, 2.15, 0)
+script=ExtResource("10")
+[node name="Slot0" type="MeshInstance3D" parent="RuneBillboard"]
+transform=Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.24, 0, 0)
+mesh=SubResource("RuneBox")
+visible=false
+[node name="Slot1" type="MeshInstance3D" parent="RuneBillboard"]
+mesh=SubResource("RuneBox")
+visible=false
+[node name="Slot2" type="MeshInstance3D" parent="RuneBillboard"]
+transform=Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 0, 0)
+mesh=SubResource("RuneBox")
+visible=false

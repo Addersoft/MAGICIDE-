@@ -66,3 +66,10 @@ Graphical/OS input, ten-minute manual playtest and target hardware performance r
 Fresh-copy verification: copied source without .godot/.git into a clean directory; editor import
 exit 0 and main-scene headless launch for 120 frames exit 0. Linux release export attempt exit 1,
 explicitly reporting missing 4.5.stable export templates; no executable delivered.
+
+## M08 v0.8.0
+Godot 4.5 stable official 876b29033 Linux headless. Editor import exit 0. All earlier 101 checks pass.
+M08 23 checks pass, exit 0; total 124. Covers empty Tag regression, unbound 2/3, slot-1 insert,
+cap/discard, C clear, Kenaz 16/24 consume, 2 s cooldown, unsupported mix reject/keep/fail signal,
+death blocks insert, respawn clears queue.
+Not tested: GPU, Kenaz feel, fire volumes, loadout UI, export, Gate A playtest.

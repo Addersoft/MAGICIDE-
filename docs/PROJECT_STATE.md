@@ -1,26 +1,20 @@
 # PROJECT_STATE
-Milestone: M07 v0.7.0 implemented/reviewed/headless tested; Gate A manual/export acceptance pending.
-Engine: Godot 4.5 stable official 876b29033, Compatibility, 60 Hz physics.
-Implemented M01–M07: one arena/player/dummy, FPS movement/jump/sprint/crouch, health/Tag/knockback,
-death/respawn, 3-minute practice timer/end overlay/restart. No winner scoring, teams, runes or broom.
-Tests: import +101 checks (10+10+11+12+19+22+17) pass in Linux headless. Full-length manual round,
-ten-minute playtest, graphics/input comfort and standalone executable run remain unverified.
-Template download failed; export presets included. Gate A is not accepted by headless tests alone.
-Next: Gate A feedback/fixes and PC export, then M08 rune queue after unresolved rune semantics are
-resolved. Do not silently treat implementation as confirmed fun/working graphically.
+Milestone: M08 v0.8.0 implemented/reviewed; Gate A manual/export still pending.
+Engine: Godot 4.5 stable official, Compatibility, 60 Hz physics.
+Implemented M01–M08: arena/player/dummy, FPS move/jump/sprint/crouch, health/Tag/knockback,
+death/respawn, 3-minute practice round, Kenaz rune queue and Kenaz-only hitscan spell.
+No broom, parkour suite, burning zones, horses, destruction, cars, or 24-rune catalog.
+Next: verify M08 in editor, then either Isa as second rune or broom FPS→third-person proof.
+Do not treat Gate A or Kenaz “feel” as confirmed without a PC playtest.
 
-RoundManager owns timer, ended latch and coalesced deferred current-scene reload. Priority -100
-processes expiry before actors. End releases capture, disables Health damage and actor processing;
-HUD remains active. Root is not paused. RoundHUD owns clock, end overlay, Restart button.
-Restart reconstructs whole arena/actors/timers from current scene. Escape does not pause clock.
-Health.damage_enabled and input.gameplay_enabled prevent ended-round actions/direct damage.
+RuneQueue owns three slots, newest at index 0. Loadout[0] = kenaz; 2 and 3 unbound.
+SpellCatalog.resolve is side-effect free. CombatController still owns the physics ray and cooldown.
+Empty queue → Tag 12. Kenaz copies 1/2/3 → 16/20/24. Unsupported mix rejects without cooldown.
+Successful Kenaz consume()s the queue. C clears. Respawn clears. Dead/uncaptured cannot insert.
 
-Prior lifecycle: 3 s respawn at original standing-clear spawn, .25 s retry if blocked, in-place actor
-reset, pointer remains released after individual respawn. Round restart uses normal startup capture.
-Tag 12 damage/2 s/no mana/no falloff; eye ray1000 m covers arena. Horizontal impulse separate from
-input. Layers1 world,2 actors; masks3. H/J debug damage. Crouch Ctrl+S suppresses backward S.
-Paths: scripts/match/round_manager.gd; scripts/ui/round_hud.gd; main.tscn; input/health gates;
-export_presets.cfg; tests/m01_smoke.gd through m07_smoke.gd. Full history git-baseline.bundle.
-Known bugs: none in executed checks; manual/export gates remain pending. No templates obtainable here.
-Debt: local authority, debug controls, fixed respawn/no dynamic floor, eye-origin shot, no final art.
-Decisions ADR-007. Checkpoint docs/checkpoints/M07.md. Retain permanent first-person-on-foot rule.
+Paths: scripts/runes/*; data/runes/kenaz.tres; scripts/combat/combat_controller.gd;
+scripts/player/player_input.gd; scripts/ui/rune_hud.gd; scenes/player/player.tscn;
+tests/m08_smoke.gd; docs/decisions/ADR-008-rune-queue.md.
+Known bugs: none claimed beyond pending Gate A/export. Kenaz is hitscan, not fire volumes.
+Debt: local authority, debug H/J, fixed spawns, eye-origin shot, one bound rune, no final art.
+Decisions ADR-008. Checkpoint docs/checkpoints/M08.md. Retain first-person-on-foot rule.

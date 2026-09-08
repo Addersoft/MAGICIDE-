@@ -66,3 +66,10 @@ arithmetic in UI. Restart reloads the complete current scene (not a patchwork of
 arena/actors/subscriptions/timers from source. Repeated restart requests are coalesced until reload.
 Health has a damage_enabled gate for ended-round direct calls; new scene resets it to true.
 PlayerInput gameplay_enabled gate prevents recapture of controls after time expires.
+
+M08: RuneDefinition resources are authored data only. RuneQueue owns bound loadout and the live
+three-slot array (index 0 = newest). SpellCatalog.resolve is a pure function. CombatController still
+owns cooldown, pending shot and the physics ray. Empty queue uses Tag damage; Kenaz-only uses scaled
+damage then consume(); unsupported emits cast_failed and does not touch cooldown or the ray.
+PlayerInput emits rune_insert_requested(0..2) and rune_clear_requested. RuneHud and RuneBillboard are
+presentation. No autoload. No 24-rune script.

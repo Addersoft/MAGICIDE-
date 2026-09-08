@@ -18,3 +18,7 @@
 - Practice rounds have a timer only. Team scoring/best-of-three remain later match work, not implied
   by the round-end overlay. Full current-scene reload is the bounded M07 restart implementation.
 - Gate A ten-minute real playtest not yet reported; headless checks cannot establish feel or rendering.
+
+- M08 Kenaz is a colored hitscan, not a fire volume or projectile. Burning zones remain later.
+- Only key 1 is bound. Pre-match three-rune loadout UI is not started.
+- World cubes are placeholder meshes, not stylized runes.

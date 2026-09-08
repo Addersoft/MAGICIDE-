@@ -82,3 +82,13 @@ Run m07_smoke.gd and earlier fixtures. On PC:
 - Gate A remains pending until visual/comfort checks, clean import and standalone execution pass.
 The M07 automated fixture tests real scene reload plus near-expiry timing; it does not wait the full
 three-minute wall-clock duration. Manual full-round timing remains explicitly pending.
+
+## M08 acceptance
+Run tests/m08_smoke.gd plus prior fixtures. In F5 play:
+- Empty queue LMB still deals 12 Tag damage and starts the 2 s cooldown.
+- Press 1: Kenaz appears in HUD slot 1 and as an orange cube over the caster.
+- Press 1 three more times: still three Kenaz; oldest drops.
+- Keys 2 and 3 do nothing. C clears cubes and HUD without shooting.
+- One Kenaz then LMB: 16 damage, queue empties, 2 s cooldown.
+- Three Kenaz then LMB: 24 damage.
+- Camera stays first person. Round end still blocks insert/cast.

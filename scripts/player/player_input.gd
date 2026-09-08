@@ -3,6 +3,8 @@ extends Node
 signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
+signal rune_insert_requested(index: int)
+signal rune_clear_requested
 var controls_active: bool = false
 var gameplay_enabled: bool = true
 var _discard_motion: bool = false
@@ -40,6 +42,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Reserve Ctrl+LMB for future Link; it must not also fire Tag.
 		if not event.ctrl_pressed:
 			primary_requested.emit()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("rune_1") and controls_active:
+		rune_insert_requested.emit(0)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("rune_2") and controls_active:
+		rune_insert_requested.emit(1)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("rune_3") and controls_active:
+		rune_insert_requested.emit(2)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("rune_clear") and controls_active:
+		rune_clear_requested.emit()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and controls_active:
 		if _discard_motion:

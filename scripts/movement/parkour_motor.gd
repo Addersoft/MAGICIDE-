@@ -1,11 +1,11 @@
 extends Node
-## Priority: Jump (sprint/slide) > Roll (Q/E) > Slide > Ledge > Ground/Air.
+## Priority: Jump (sprint/slide) > Roll (Q/E lateral dodge) > Slide > Ledge > Ground/Air.
 @export_range(9.0, 30.0) var speed_cap: float = 24.0
 @export_range(35.0, 150.0) var ground_acceleration: float = 95.0
 @export_range(1.0, 34.0) var ground_braking: float = 28.0
 @export_range(1.0, 40.0) var air_acceleration: float = 22.0
 @export_range(0.1, 10.0) var slide_friction: float = 1.8
-@export_range(0.15, 0.6) var roll_duration: float = 0.42
+@export_range(0.15, 0.6) var roll_duration: float = 0.35
 @export_range(8.0, 22.0) var roll_speed: float = 16.0
 @export_range(0.3, 3.0) var roll_cooldown_time: float = 0.55
 
@@ -200,7 +200,7 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 	var wall_valid: bool = not wall.is_empty() and (wall_lock <= 0.0 or wall.normal.dot(_last_wall) < 0.5)
 
 	var jumped: bool = false
-	var can_floor_jump: bool = jump_buffer > 0.0 and (grounded or coyote > 0.0)
+	var can_floor_jump: bool = jump_buffer > 0.0 and (on_floor or coyote > 0.0 or actor.is_on_floor())
 	if can_floor_jump:
 		var was_sliding: bool = slide_time > 0.0 or actor.posture.sliding
 		vy = actor.jump_speed
@@ -219,12 +219,8 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 			var fwd: Vector3 = -actor.view.horizontal_basis().z
 			if not wish.is_zero_approx():
 				fwd = wish.normalized()
-			if horizontal.length() < target * 0.85:
-				horizontal = fwd * target
-			elif sprinting:
-				horizontal = horizontal.limit_length(speed_cap)
-				if horizontal.length() < actor.sprint_speed:
-					horizontal = horizontal.normalized() * actor.sprint_speed if horizontal.length() > 0.1 else fwd * actor.sprint_speed
+			if horizontal.length() < target * 0.85 or sprinting:
+				horizontal = fwd * maxf(target, horizontal.length())
 		jumped = true
 		jump_buffer = 0.0
 		coyote = 0.0
@@ -232,7 +228,7 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		_jump_cut = false
 		_jump_active = true
 		if actor.posture.crouched and actor.posture.can_stand():
-			actor.posture.toggle()
+			actor.posture.set_crouched(false)
 	elif jump_buffer > 0.0 and wall_valid:
 		var along: Vector3 = horizontal.slide(wall.normal)
 		if along.length() < 3.0:
@@ -266,17 +262,13 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 	if roll_time > 0.0:
 		roll_time = maxf(0.0, roll_time - delta)
 		state = "ROLL"
-		var progress: float = 1.0 - (roll_time / roll_duration)
-		var roll_angle: float = progress * TAU * roll_sign
 		if actor.view.has_method("set_roll"):
-			actor.view.set_roll(roll_angle)
+			actor.view.set_roll(0.0)
 		if not wish.is_zero_approx():
 			accelerate(wish.normalized(), horizontal.length(), air_acceleration * 0.5, delta)
 		if not grounded and not jumped:
 			vy -= actor.gravity * delta
 		if roll_time <= 0.0:
-			if actor.view.has_method("set_roll"):
-				actor.view.set_roll(0.0)
 			roll_sign = 0.0
 	elif grounded and slide_time > 0.0 and not jumped:
 		slide_time = maxf(0.0, slide_time - delta)

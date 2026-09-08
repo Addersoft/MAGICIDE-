@@ -2,13 +2,13 @@ extends Node
 ## Computes locomotion velocity; PlayerController alone invokes body movement.
 ## Titanfall / Mirror's Edge style momentum: wall-run, wall-jump, vault, ledge hang,
 ## coyote/buffer, slide-jump, glide, and Q/E directional rolls.
-@export_range(9.0, 30.0) var speed_cap: float = 18.0
-@export_range(35.0, 150.0) var ground_acceleration: float = 65.0
-@export_range(1.0, 34.0) var ground_braking: float = 30.0
-@export_range(1.0, 40.0) var air_acceleration: float = 14.0
+@export_range(9.0, 30.0) var speed_cap: float = 24.0
+@export_range(35.0, 150.0) var ground_acceleration: float = 95.0
+@export_range(1.0, 34.0) var ground_braking: float = 28.0
+@export_range(1.0, 40.0) var air_acceleration: float = 20.0
 @export_range(0.1, 10.0) var slide_friction: float = 2.2
 @export_range(0.15, 0.6) var roll_duration: float = 0.38
-@export_range(8.0, 20.0) var roll_speed: float = 13.5
+@export_range(8.0, 20.0) var roll_speed: float = 14.5
 @export_range(0.5, 3.0) var roll_cooldown_time: float = 1.0
 
 const BUFFER: float = 0.12
@@ -185,7 +185,6 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 
 	if crouch_pressed and actor.posture.crouched or slide:
 		start_slide()
-	# Hold-to-slide: while Ctrl held and moving, keep the slide budget topped up.
 	if input.has_method("slide_held") and input.slide_held() and grounded and horizontal.length() > 3.0:
 		if slide_time <= 0.0:
 			start_slide()
@@ -221,15 +220,15 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		vy = actor.jump_speed
 		if slide_time > 0.0:
 			var launch: Vector3 = -actor.view.horizontal_basis().z
-			horizontal = launch * minf(16.0, maxf(12.0, horizontal.length() + 2.0))
-			vy = clampf(actor.jump_speed + sin(actor.view.rotation.x) * 3.0, 6.0, 10.0)
+			horizontal = launch * minf(18.0, maxf(14.0, horizontal.length() + 2.0))
+			vy = clampf(actor.jump_speed + sin(actor.view.rotation.x) * 3.0, 6.0, 11.0)
 			_finish_slide()
 		jumped = true
 	elif jump_buffer > 0.0 and wall_valid:
 		var along: Vector3 = horizontal.slide(wall.normal)
 		if along.length() < 3.0:
-			along = -actor.view.horizontal_basis().z.slide(wall.normal) * 8.0
-		horizontal = (along + wall.normal * 6.0).limit_length(speed_cap)
+			along = -actor.view.horizontal_basis().z.slide(wall.normal) * 9.0
+		horizontal = (along + wall.normal * 7.0).limit_length(speed_cap)
 		vy = actor.jump_speed
 		_last_wall = wall.normal
 		wall_lock = 0.3
@@ -272,7 +271,7 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		_last_wall = wall.normal
 		horizontal = horizontal.slide(wall.normal)
 		var along: Vector3 = horizontal.normalized()
-		accelerate(along, 10.5, 20.0, delta)
+		accelerate(along, 12.0, 24.0, delta)
 		vy = clampf(vy, -1.5, 2.5)
 	else:
 		state = "GROUND" if grounded else "AIR"

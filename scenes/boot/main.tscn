@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 [ext_resource type="PackedScene" path="res://scenes/arenas/arena_graybox.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/actors/dummy.tscn" id="3"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/ui/round_hud.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/ui/rune_hud.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/ui/broom_hud.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/ui/speed_vignette.gd" id="10"]
 [sub_resource type="Environment" id="Environment"]
 background_mode=1
 background_color=Color(0.08,0.11,0.16,1)
@@ -38,10 +39,7 @@ theme_override_colors/font_shadow_color=Color(0,0,0,1)
 theme_override_constants/shadow_offset_x=2
 theme_override_constants/shadow_offset_y=2
 theme_override_font_sizes/font_size=20
-text="WIZARDS!  /  M09 • v0.9.0
-WASD  Move     Mouse  Look     Esc  Release     Click  Capture
-Space  Jump / broom up     Hold Shift  Sprint     Ctrl+S  Crouch     F  Broom
-1  Kenaz     C  Clear queue     Empty LMB  Tag     Queued LMB  Cast"
+text="WIZARDS!  /  P01 Parkour\nWASD  Move     Mouse  Look     Esc  Release     Click  Capture\nSpace  Jump / broom up     Hold Shift  Sprint / broom boost\nCtrl tap crouch     Ctrl hold slide     F  Broom     Q/E roll\n1  Kenaz     C  Clear     LMB  Tag/Cast"
 [node name="Crosshair" type="Label" parent="HUD"]
 anchors_preset=8
 anchor_left=0.5
@@ -161,3 +159,6 @@ offset_top=145.0
 offset_right=360.0
 offset_bottom=197.0
 text="Restart round"
+
+[node name="SpeedVignette" type="CanvasLayer" parent="."]
+script=ExtResource("10")

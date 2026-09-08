@@ -35,3 +35,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_discard_motion = false
 			return
 		look_requested.emit(event.screen_relative)
+
+func jump_requested() -> bool:
+	return controls_active and Input.is_action_just_pressed("jump")
+
+func sprint_held() -> bool:
+	return controls_active and Input.is_action_pressed("sprint")

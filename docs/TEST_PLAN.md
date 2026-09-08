@@ -21,3 +21,12 @@ Likely failures: OS-specific mouse capture/warp, graphics driver behavior, frame
 embedded-game pointer handling. If embedded play misbehaves, use a separate game window and
 report both results. Headless tests cannot prove comfort or visual correctness.
 Stop if a check fails; give exact reproduction and debugger text. Do not add M02 over a blocker.
+
+## M02 manual acceptance
+Run tests/m02_smoke.gd using the same command form. Then in the game:
+- Space launches once, lands, and a fresh press jumps again. Hold Space through landing: no auto-hop.
+- Press Space in the air: no double jump. Jump below the low beam: no ceiling penetration.
+- Hold Shift while moving: faster than walking; diagonal motion does not add speed.
+- Release Shift: walk speed returns. Escape/focus loss: movement and jump are blocked.
+- Compare feel at render caps 30/60/144 with 60 Hz physics. Jump height/timing should be equivalent.
+- Confirm all on-foot camera behavior remains FPS. No camera roll, head bob or sprint FOV shift added.

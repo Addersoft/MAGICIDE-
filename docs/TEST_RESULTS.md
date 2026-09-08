@@ -11,3 +11,12 @@ obstacle blocks motion; pitch clamp; capture release disables movement.
 Not executed: interactive graphical playtest, OS pointer/focus scenarios, 30/60/144 render-rate
 comparison, five-minute soak or exported desktop executable. These are pending acceptance.
 Status: generated, reviewed, tested headlessly. Confirmed only for the listed checks/environment.
+
+## M02 v0.2.0
+Same Linux headless Godot 4.5 stable environment. Editor import exit 0, no parser errors.
+M01 regression fixture: all 10 checks pass, exit 0.
+M02 fixture: all 10 checks pass, exit 0: physical Space/Shift mappings; 9 m sprint over 60 ticks;
+normalized diagonal sprint; releasing Shift restores 6 m/s; ground jump launch; no air double
+jump; held jump does not repeat on landing; released capture blocks actions; low beam blocks jump.
+Manual visual/feel checks and render-cap comparison remain pending. User explicitly requested
+continuation to M02; that instruction does not establish that M01 manual tests passed.

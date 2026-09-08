@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/camera/player_camera.gd" id="3"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://scripts/movement/traversal_probe.gd" id="13"]
 [ext_resource type="Script" path="res://scripts/movement/parkour_motor.gd" id="14"]
 [ext_resource type="Script" path="res://scripts/vfx/wand_presentation.gd" id="15"]
+[ext_resource type="Script" path="res://scripts/vfx/ward_shield.gd" id="16"]
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius=0.35
 height=1.8
@@ -89,3 +90,6 @@ script=ExtResource("14")
 
 [node name="WandPresentation" type="Node3D" parent="."]
 script=ExtResource("15")
+
+[node name="WardShield" type="Node3D" parent="."]
+script=ExtResource("16")

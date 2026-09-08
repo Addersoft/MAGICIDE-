@@ -68,6 +68,11 @@ primary_fire={
 "events": [Object(InputEventMouseButton,"button_index":1)]
 }
 
+shield={
+"deadzone": 0.2,
+"events": [Object(InputEventMouseButton,"button_index":2)]
+}
+
 rune_1={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":49)]
@@ -98,7 +103,7 @@ parkour_dodge={
 }
 parkour_glide={
 "deadzone": 0.2,
-"events": [Object(InputEventMouseButton,"button_index":2)]
+"events": []
 }
 roll_left={
 "deadzone": 0.2,

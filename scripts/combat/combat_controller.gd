@@ -1,11 +1,11 @@
 extends Node
-## Local attack authority. Empty queue is Tag; Kenaz-only queues are the M08 spell.
-## Presentation: last_origin / last_hit feed WandPresentation + SpiralBeam (no damage authority there).
+## Local attack authority. Never blocked by slide / sprint / air / roll.
+## Empty queue is Tag; Kenaz-only queues are the M08 spell.
 signal combat_reset
 signal shot_resolved(hit_position: Vector3, damage: float)
 signal cast_failed(reason: String)
 const TAG_DAMAGE: float = 12.0
-const TAG_COOLDOWN: float = 2.0
+const TAG_COOLDOWN: float = 1.15
 const QUERY_RANGE: float = 1000.0
 const KNOCKBACK_SPEED: float = 5.0
 const MUZZLE_LOCAL := Vector3(0.22, -0.23, -0.57)

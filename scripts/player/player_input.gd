@@ -1,5 +1,6 @@
 extends Node
 ## Raw input ownership. No movement or camera transforms here.
+## Combat and movement share keys without mutually canceling each other.
 signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
@@ -8,7 +9,6 @@ signal rune_clear_requested
 var controls_active: bool = false
 var gameplay_enabled: bool = true
 var _discard_motion: bool = false
-var _ctrl_was_down: bool = false
 
 func _ready() -> void:
 	set_capture(true)
@@ -24,19 +24,13 @@ func set_capture(captured: bool) -> void:
 func movement_axis() -> Vector2:
 	if not controls_active:
 		return Vector2.ZERO
-	# S always available for backward; crouch is pure Ctrl tap, not Ctrl+S chord.
 	return Vector2(
 		Input.get_axis("move_left", "move_right"),
 		Input.get_action_strength("move_backward") - Input.get_action_strength("move_forward")
 	).limit_length(1.0)
 
 func fly_axis() -> Vector2:
-	if not controls_active:
-		return Vector2.ZERO
-	return Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_action_strength("move_backward") - Input.get_action_strength("move_forward")
-	).limit_length(1.0)
+	return movement_axis()
 
 func fly_vertical() -> float:
 	if not controls_active:
@@ -58,8 +52,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_capture(true)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("primary_fire") and controls_active:
-		if not event.ctrl_pressed:
-			primary_requested.emit()
+		# Always allow fire while captured — including mid-slide / mid-sprint (Ctrl held).
+		primary_requested.emit()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_1") and controls_active:
 		rune_insert_requested.emit(0)
@@ -89,14 +83,10 @@ func sprint_held() -> bool:
 	return controls_active and Input.is_action_pressed("sprint")
 
 func boost_held() -> bool:
-	## Shift while mounted = broom boost.
 	return controls_active and Input.is_action_pressed("sprint")
 
 func crouch_toggled() -> bool:
-	## Tap Ctrl while stationary / near-stationary toggles crouch.
-	if not controls_active:
-		return false
-	if not Input.is_action_just_pressed("crouch_modifier"):
+	if not controls_active or not Input.is_action_just_pressed("crouch_modifier"):
 		return false
 	var axis := movement_axis()
 	var planar_speed := 0.0
@@ -106,20 +96,16 @@ func crouch_toggled() -> bool:
 	return axis.length() < 0.25 and planar_speed < 3.5
 
 func slide_held() -> bool:
-	## Hold Ctrl while moving = stay in / enter slide.
-	if not controls_active:
-		return false
-	if not Input.is_action_pressed("crouch_modifier"):
+	if not controls_active or not Input.is_action_pressed("crouch_modifier"):
 		return false
 	var axis := movement_axis()
 	var body = get_parent()
 	var planar_speed := 0.0
 	if body is CharacterBody3D:
 		planar_speed = Vector2(body.velocity.x, body.velocity.z).length()
-	return axis.length() > 0.2 or planar_speed > 3.5
+	return axis.length() > 0.15 or planar_speed > 3.0
 
 func slide_requested() -> bool:
-	## Rising edge into slide: press Ctrl while already moving, or dedicated parkour_slide.
 	if not controls_active:
 		return false
 	if Input.is_action_just_pressed("parkour_slide"):
@@ -130,7 +116,7 @@ func slide_requested() -> bool:
 		var planar_speed := 0.0
 		if body is CharacterBody3D:
 			planar_speed = Vector2(body.velocity.x, body.velocity.z).length()
-		return axis.length() > 0.2 or planar_speed > 3.5
+		return axis.length() > 0.15 or planar_speed > 3.0
 	return false
 
 func glide_held() -> bool:
@@ -149,4 +135,3 @@ func roll_right_requested() -> bool:
 
 func reset_for_respawn() -> void:
 	set_capture(false)
-	_ctrl_was_down = Input.is_action_pressed("crouch_modifier")

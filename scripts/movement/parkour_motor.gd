@@ -1,18 +1,16 @@
 extends Node
-## Computes locomotion velocity; PlayerController alone invokes body movement.
-## Priority: Jump (incl. slide-jump / sprint-jump) > Roll > Slide > Ledge > Ground/Air.
-## Combat never gates movement; movement never gates combat.
+## Priority: Jump (sprint/slide) > Roll (Q/E) > Slide > Ledge > Ground/Air.
 @export_range(9.0, 30.0) var speed_cap: float = 24.0
 @export_range(35.0, 150.0) var ground_acceleration: float = 95.0
 @export_range(1.0, 34.0) var ground_braking: float = 28.0
 @export_range(1.0, 40.0) var air_acceleration: float = 22.0
 @export_range(0.1, 10.0) var slide_friction: float = 1.8
-@export_range(0.15, 0.6) var roll_duration: float = 0.38
-@export_range(8.0, 20.0) var roll_speed: float = 14.5
-@export_range(0.5, 3.0) var roll_cooldown_time: float = 0.85
+@export_range(0.15, 0.6) var roll_duration: float = 0.42
+@export_range(8.0, 22.0) var roll_speed: float = 16.0
+@export_range(0.3, 3.0) var roll_cooldown_time: float = 0.55
 
-const BUFFER: float = 0.18
-const COYOTE: float = 0.16
+const BUFFER: float = 0.25
+const COYOTE: float = 0.22
 var horizontal: Vector3 = Vector3.ZERO
 var state: String = "GROUND"
 var coyote: float = 0.0
@@ -100,9 +98,12 @@ func start_roll(sign: float) -> bool:
 	roll_cooldown = roll_cooldown_time
 	_finish_slide()
 	var right: Vector3 = actor.view.horizontal_basis().x
+	var forward: Vector3 = -actor.view.horizontal_basis().z
 	var boost: Vector3 = right * sign * roll_speed
-	var forward_comp: Vector3 = horizontal.slide(right)
-	horizontal = (forward_comp + boost).limit_length(speed_cap)
+	var keep: Vector3 = horizontal.slide(right)
+	if keep.length() < 4.0:
+		keep = forward * maxf(horizontal.length(), 8.0)
+	horizontal = (keep + boost).limit_length(speed_cap)
 	state = "ROLL"
 	return true
 
@@ -195,13 +196,6 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 			else:
 				slide_time = maxf(slide_time, 0.4)
 
-	if input.has_method("dodge_requested") and input.dodge_requested() and dodge_cooldown <= 0.0 and roll_time <= 0.0:
-		var dash: Vector3 = wish.normalized() if not wish.is_zero_approx() else -actor.view.horizontal_basis().z
-		horizontal = dash * 14.0
-		dodge_time = 0.18
-		dodge_cooldown = 1.0
-		_finish_slide()
-
 	var wall: Dictionary = probe.side_wall() if not grounded else {}
 	var wall_valid: bool = not wall.is_empty() and (wall_lock <= 0.0 or wall.normal.dot(_last_wall) < 0.5)
 
@@ -220,11 +214,17 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 			vy = actor.jump_speed + 1.5
 			_finish_slide()
 		else:
-			if input.sprint_held() and horizontal.length() < actor.sprint_speed * 0.9:
-				var fwd: Vector3 = -actor.view.horizontal_basis().z
-				if not wish.is_zero_approx():
-					fwd = wish.normalized()
-				horizontal = fwd * actor.sprint_speed
+			var sprinting: bool = input.sprint_held()
+			var target: float = actor.sprint_speed if sprinting else maxf(horizontal.length(), actor.walk_speed)
+			var fwd: Vector3 = -actor.view.horizontal_basis().z
+			if not wish.is_zero_approx():
+				fwd = wish.normalized()
+			if horizontal.length() < target * 0.85:
+				horizontal = fwd * target
+			elif sprinting:
+				horizontal = horizontal.limit_length(speed_cap)
+				if horizontal.length() < actor.sprint_speed:
+					horizontal = horizontal.normalized() * actor.sprint_speed if horizontal.length() > 0.1 else fwd * actor.sprint_speed
 		jumped = true
 		jump_buffer = 0.0
 		coyote = 0.0
@@ -270,13 +270,14 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		var roll_angle: float = progress * TAU * roll_sign
 		if actor.view.has_method("set_roll"):
 			actor.view.set_roll(roll_angle)
+		if not wish.is_zero_approx():
+			accelerate(wish.normalized(), horizontal.length(), air_acceleration * 0.5, delta)
+		if not grounded and not jumped:
+			vy -= actor.gravity * delta
 		if roll_time <= 0.0:
 			if actor.view.has_method("set_roll"):
 				actor.view.set_roll(0.0)
 			roll_sign = 0.0
-	elif dodge_time > 0.0:
-		dodge_time = maxf(0.0, dodge_time - delta)
-		state = "DODGE"
 	elif grounded and slide_time > 0.0 and not jumped:
 		slide_time = maxf(0.0, slide_time - delta)
 		horizontal = horizontal.move_toward(Vector3.ZERO, slide_friction * delta)
@@ -309,7 +310,7 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 
 	if grounded and not jumped:
 		vy = 0.0
-	elif not jumped:
+	elif not jumped and state != "ROLL":
 		var gravity_scale: float = 0.15 if state == "WALL RUN" else 1.0
 		if input.glide_held() and glide_budget > 0.0 and vy <= 0.0:
 			glide_budget = maxf(0.0, glide_budget - delta)

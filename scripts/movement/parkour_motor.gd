@@ -24,7 +24,7 @@ var wall_lock: float = 0.0
 var glide_budget: float = 1.2
 var roll_time: float = 0.0
 var roll_cooldown: float = 0.0
-var roll_sign: float = 0.0  # -1 left (CCW), +1 right (CW)
+var roll_sign: float = 0.0
 var _restore_standing: bool = false
 var _last_wall: Vector3 = Vector3.ZERO
 var _route: Array[Vector3] = []
@@ -90,7 +90,6 @@ func start_slide() -> bool:
 	return true
 
 func start_roll(sign: float) -> bool:
-	## sign: -1 = left / counter-clockwise, +1 = right / clockwise
 	if roll_cooldown > 0.0 or roll_time > 0.0:
 		return false
 	if state == "HANG" or state == "VAULT":
@@ -186,6 +185,12 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 
 	if crouch_pressed and actor.posture.crouched or slide:
 		start_slide()
+	# Hold-to-slide: while Ctrl held and moving, keep the slide budget topped up.
+	if input.has_method("slide_held") and input.slide_held() and grounded and horizontal.length() > 3.0:
+		if slide_time <= 0.0:
+			start_slide()
+		else:
+			slide_time = maxf(slide_time, 0.35)
 
 	if input.has_method("dodge_requested") and input.dodge_requested() and dodge_cooldown <= 0.0 and roll_time <= 0.0:
 		var dash: Vector3 = wish.normalized() if not wish.is_zero_approx() else -actor.view.horizontal_basis().z

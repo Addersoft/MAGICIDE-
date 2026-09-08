@@ -6,11 +6,14 @@ extends CharacterBody3D
 @export var gravity: float = 20.0
 @onready var player_input = $PlayerInput
 @onready var view = $View
+@onready var posture = $Posture
 
 func _ready() -> void:
 	player_input.look_requested.connect(view.apply_look)
 
 func _physics_process(delta: float) -> void:
+	if player_input.crouch_toggled():
+		posture.toggle()
 	var axis: Vector2 = player_input.movement_axis()
 	var direction: Vector3 = view.horizontal_basis() * Vector3(axis.x, 0.0, axis.y)
 	var speed: float = sprint_speed if player_input.sprint_held() else walk_speed

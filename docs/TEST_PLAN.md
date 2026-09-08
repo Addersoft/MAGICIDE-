@@ -30,3 +30,13 @@ Run tests/m02_smoke.gd using the same command form. Then in the game:
 - Release Shift: walk speed returns. Escape/focus loss: movement and jump are blocked.
 - Compare feel at render caps 30/60/144 with 60 Hz physics. Jump height/timing should be equivalent.
 - Confirm all on-foot camera behavior remains FPS. No camera roll, head bob or sprint FOV shift added.
+
+## M03 manual acceptance
+- Ctrl+S once crouches; holding does not repeat; release/repress stands in clear space.
+- W+Shift, then add Ctrl+S: speed should remain at sprint baseline.
+- Ctrl+S alone does not move backward. S without Ctrl still moves backward normally.
+- Jump/crouch and low ceilings: no camera inside roof, no standing through a roof.
+- In a test scene add a roof with 1.3 m clearance: crouch fits, stand is denied; move out then retry.
+- Esc or focus loss blocks crouch. Check chord after recapture for accidental toggles.
+- Eye-height change currently snaps intentionally; report discomfort before adding smoothing.
+Run tests/m03_smoke.gd as well as M01/M02. No future systems should mask a failed acceptance test.

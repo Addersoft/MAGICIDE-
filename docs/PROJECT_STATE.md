@@ -1,25 +1,20 @@
 # PROJECT_STATE
-Current milestone: M02 v0.2.0 generated/reviewed; headless tests passed; manual acceptance pending.
-Engine: Godot 4.5.stable.official.876b29033, Compatibility, 60 Hz physics, typed GDScript.
-Implementation: M01 FPS graybox movement plus M02 Space jump and held Shift sprint.
-Tests: engine import passes; M01 10/10 and M02 10/10 integration checks pass in Linux headless.
-No visual/comfort, OS pointer or render-cap checks confirmed. User requested continuation with Go;
-this authorized M02 but is not evidence of M01 manual acceptance.
+Milestone: M03 v0.3.0 implemented/reviewed, headless tested; manual acceptance pending.
+Engine: Godot 4.5 stable official 876b29033; Compatibility; 60 Hz physics.
+Implemented: FPS graybox movement, jump/sprint, Ctrl+S crouch toggle and headroom check.
+Verified: import and 31 checks (M01 10, M02 10, M03 11) pass in Linux headless.
+Unverified: graphical playtest, pointer/focus on target PC, render cap comparison, comfort.
+Next: manual feedback/bug fixes, then M04 health/damage. No combat/runes/broom yet.
 
-Next: PC playtest and bug feedback; then M03 Ctrl+S crouch. Before M03 resolve S/backward chord
-policy. Do not implement later features without instruction. No crouch, combat, runes or broom yet.
-Ownership unchanged: PlayerInput polls actions; PlayerCamera owns View; PlayerController alone
-writes velocity and calls move_and_slide. Input jump is a fresh press accepted only on the floor.
-Speed: walk 6, sprint 9 m/s; jump 7 m/s upward, gravity 20 m/s². Sprint is omnidirectional and can
-be held in air for this tunable baseline. No momentum model, buffering, variable jump or stamina yet.
-
-Paths: project.godot; scenes/boot/main.tscn; scenes/player/player.tscn;
-scripts/player/player_input.gd and player_controller.gd; scripts/camera/player_camera.gd;
-tests/m01_smoke.gd, tests/m02_smoke.gd. Layers 1 world, 2 player.
-Known bugs: none in executed checks; untested graphical behavior unknown.
-Debt: immediate velocity assignment incompatible with eventual preserved momentum/impulses;
-no saved settings; local input only. See TECH_DEBT.md.
-Decisions: ADR-001 foundation, ADR-002 M02 tuning. Full baseline in user master specification.
-Invariants: first person on foot; eventual third-person broom; data-driven newest-first runes;
-Ctrl+S crouch must preserve momentum; no silent scope changes or claims of unrun tests.
-Repository history: included git-baseline.bundle. Current checkpoint docs/checkpoints/M02.md.
+Input policy: Ctrl+S reserved for crouch; S suppressed as backward input while Ctrl held.
+Chord rising edge, one toggle; failed stand requires fresh press after moving clear.
+Posture: standing collider 1.8 m / eye 1.65; crouched collider 1 m / eye .85; eye snaps safely.
+PlayerPosture changes shape/offset, never velocity; PlayerCamera owns eye and view transform.
+PlayerController still sole velocity/move_and_slide owner. PlayerInput owns chord detection.
+Paths: scripts/player/player_posture.gd; player_controller.gd; player_input.gd;
+scripts/camera/player_camera.gd; scenes/player/player.tscn; tests/m01–m03_smoke.gd.
+Known bugs: none observed in executed checks. Manual acceptance remains outstanding despite Go.
+Debt: baseline immediate movement still needs external impulse/acceleration design for knockback;
+no full momentum system, saved settings or networking. Normal braking still applies while crouched.
+Do not change: FPS on foot, future third-person broom, newest-first data-driven runes, small patches.
+Decisions: ADR-001/002/003. Checkpoint: docs/checkpoints/M03.md. History in git-baseline.bundle.

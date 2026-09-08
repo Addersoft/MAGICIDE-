@@ -8,6 +8,7 @@
 | release_mouse | Escape | Yes |
 | Capture | Left mouse, when released | Yes |
 | Look | Mouse motion | Yes |
+| Crouch toggle | CTRL+S | Yes, rising chord edge |
 | jump | Space | Yes, ground only, fresh press |
 | sprint | Shift | Yes, hold |
 
@@ -18,7 +19,7 @@ Reserved future design: Space jump; Shift sprint; CTRL+S crouch toggle; LMB empt
 nonempty-queue cast; 1/2/3 rune insertion; C clear; Q teleport; V invisibility; R detection;
 Shift+RMB block; MMB wand throw; Ctrl+Space hat; F harness/finisher; Ctrl+LMB link;
 Ctrl+RMB bind/pull. Broom mount binding unresolved.
-Ctrl+S backward-input arbitration must be resolved before M03. Crouch itself must not reset
+M03: Ctrl+S is reserved for crouch, so S does not command backward motion while Ctrl is held. Crouch itself must not reset
 momentum. Modifier precedence must be centralized before adding overlapping actions.
 
 M02 tuning: sprint is 9 m/s in any input direction, including airborne; no stamina, acceleration,

@@ -1,6 +1,6 @@
 config_version=5
 [application]
-config/name="WIZARDS! — M02 v0.2.0"
+config/name="WIZARDS! — M03 v0.3.0"
 run/main_scene="res://scenes/boot/main.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 [display]
@@ -43,4 +43,9 @@ jump={
 sprint={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":4194325)]
+}
+
+crouch_modifier={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":4194326)]
 }

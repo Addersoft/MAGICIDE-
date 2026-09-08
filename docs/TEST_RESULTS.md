@@ -20,3 +20,11 @@ normalized diagonal sprint; releasing Shift restores 6 m/s; ground jump launch; 
 jump; held jump does not repeat on landing; released capture blocks actions; low beam blocks jump.
 Manual visual/feel checks and render-cap comparison remain pending. User explicitly requested
 continuation to M02; that instruction does not establish that M01 manual tests passed.
+
+## M03 v0.3.0
+Headless editor import: exit 0. M01 and M02 regression fixtures: 10 checks each pass, exit 0.
+M03 fixture: 11 checks pass, exit 0. Covers Control mapping, chord toggle and no repeat, forward
+sprint speed through toggle, eye/collider dimensions, open-space stand, obstructed stand rejection,
+eye stays low, clearance recovery, posture does not mutate velocity, released capture blocks toggle.
+Environment unchanged: Godot 4.5 stable Linux headless. Manual graphics/feel/capture and render-rate
+comparison remain pending. Test evidence does not establish full parkour momentum functionality.

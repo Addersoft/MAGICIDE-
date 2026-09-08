@@ -4,6 +4,7 @@ signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
 var controls_active: bool = false
 var _discard_motion: bool = false
+var _crouch_chord_down: bool = false
 
 func _ready() -> void:
 	set_capture(true)
@@ -17,7 +18,8 @@ func set_capture(captured: bool) -> void:
 func movement_axis() -> Vector2:
 	if not controls_active:
 		return Vector2.ZERO
-	return Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	var backward: float = 0.0 if Input.is_action_pressed("crouch_modifier") else Input.get_action_strength("move_backward")
+	return Vector2(Input.get_axis("move_left", "move_right"), backward - Input.get_action_strength("move_forward")).limit_length(1.0)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
@@ -41,3 +43,9 @@ func jump_requested() -> bool:
 
 func sprint_held() -> bool:
 	return controls_active and Input.is_action_pressed("sprint")
+
+func crouch_toggled() -> bool:
+	var held: bool = Input.is_action_pressed("crouch_modifier") and Input.is_action_pressed("move_backward")
+	var pressed: bool = held and not _crouch_chord_down
+	_crouch_chord_down = held
+	return controls_active and pressed

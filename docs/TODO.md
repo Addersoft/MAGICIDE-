@@ -1,7 +1,7 @@
 # TODO
 - P0: Complete developer PC manual M01 acceptance; record hardware and results.
-- P1: M03 crouch after M01/M02 manual feedback and chord policy resolution.
-- P1 before M03: decide CTRL+S backward movement arbitration.
+- P1: M04 health/damage after playtest feedback.
+- Input: M03 uses reserved Ctrl+S; collect playtest feedback on this policy.
 - Later: health/Tag/death/round lifecycle, rune proof, then broom proof.
 - Before rune work: approve repeats, consumption, failed-cast policy and first spell.
 - Before content expansion: early multiplayer feasibility and measured performance budgets.

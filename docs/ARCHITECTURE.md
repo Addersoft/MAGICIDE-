@@ -20,3 +20,9 @@ pixel displacement without multiplying by frame delta. No third-person mode exis
 Relevant API references (Godot 4.5):
 https://docs.godotengine.org/en/4.5/classes/class_characterbody3d.html
 https://docs.godotengine.org/en/4.5/classes/class_inputeventmousemotion.html
+
+M03: PlayerPosture owns collider shape/offset and requests eye height through PlayerCamera.
+Collider shape is duplicated per instance before editing. A full standing capsule shape query
+excludes self and uses the player's collision mask. Failed stand leaves posture unchanged.
+Eye snaps with collider; movement/camera orientation owners remain unchanged. Queries and posture
+changes occur in the physics callback. No animation or separate movement state machine added.

@@ -10,3 +10,7 @@ func apply_look(delta_pixels: Vector2) -> void:
 
 func horizontal_basis() -> Basis:
 	return Basis(Vector3.UP, rotation.y)
+
+func set_eye_height(height: float) -> void:
+	# Snap alongside collider: prevents the eye entering overhead geometry during crouch.
+	position.y = height

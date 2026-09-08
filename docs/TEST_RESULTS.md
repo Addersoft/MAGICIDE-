@@ -28,3 +28,6 @@ sprint speed through toggle, eye/collider dimensions, open-space stand, obstruct
 eye stays low, clearance recovery, posture does not mutate velocity, released capture blocks toggle.
 Environment unchanged: Godot 4.5 stable Linux headless. Manual graphics/feel/capture and render-rate
 comparison remain pending. Test evidence does not establish full parkour momentum functionality.
+
+## M04 v0.4.0
+Godot 4.5 stable Linux headless import exit 0. All prior 31 checks pass. M04 12 checks pass: actor initial/independent HP, invalid values, subtraction, dummy clamp/death label, actual overkill damage, reentrant single death, dead damage rejection, blocked recapture/movement/jump, death HUD. All runners exit 0. Total 43. Interactive key handling, rendering, camera comfort and frame-cap comparisons remain unverified.

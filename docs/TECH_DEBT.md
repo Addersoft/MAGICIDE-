@@ -5,3 +5,5 @@
 - Capture response has no live HUD status. Static instructions are sufficient for M01; review if confusing.
 - No graphical/OS playtest here. M01 acceptance remains pending until developer checks pass.
 - No persisted sensitivity preferences: inspector tuning only; add settings with later UI work.
+
+- M04 debug damage is direct local input, not a production attack or network authority. Replace fixture hotkeys at combat integration. Dead dummy collision persists until lifecycle design in M06.

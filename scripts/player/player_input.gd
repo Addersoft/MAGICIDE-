@@ -10,6 +10,8 @@ func _ready() -> void:
 	set_capture(true)
 
 func set_capture(captured: bool) -> void:
+	if captured and get_parent().get_node("Health").is_dead:
+		return
 	controls_active = captured
 	_discard_motion = captured
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if captured else Input.MOUSE_MODE_VISIBLE

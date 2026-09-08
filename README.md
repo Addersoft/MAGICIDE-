@@ -1,4 +1,4 @@
-# WIZARDS! — M03 v0.3.0
+# WIZARDS! — M04 v0.4.0
 A first-person movement testbed for PC. Godot source project, not an executable or HTML game.
 
 ## Open and play
@@ -17,7 +17,7 @@ Use a PC with keyboard and mouse. Mobile controls are outside M01.
 One 40 m graybox arena; floor, walls, blocks and low beam; one capsule player;
 eye-level FPS camera; normalized WASD movement; gravity and collision; capture/focus handling;
 a small headless integration test; project state, ADR, backlog and manual test plan.
-M01–M03 are implemented; combat, runes and broom follow later.
+M01–M04 are implemented; combat, runes and broom follow later.
 
 ## Tuning
 Select Player in `scenes/player/player.tscn`: Walk Speed defaults to 6 m/s, Sprint Speed to 9 m/s, Jump Speed to 7 m/s, Gravity to 20 m/s².
@@ -37,13 +37,14 @@ godot --headless --path . --editor --import --quit
 godot --headless --path . --script res://tests/m01_smoke.gd
 godot --headless --path . --script res://tests/m02_smoke.gd
 godot --headless --path . --script res://tests/m03_smoke.gd
+godot --headless --path . --script res://tests/m04_smoke.gd
 ```
 Expected: PASS lines, `M01 failures: 0` and `M02 failures: 0`, exit code 0.
 
 ## Continue development
 Read `docs/PROJECT_STATE.md`, `docs/ARCHITECTURE.md` and `docs/TEST_PLAN.md`.
 Return your OS, Godot version and any exact errors alongside test feedback.
-Next is M04 health/damage after playtest feedback.
+Next is M05 Sniper Tag and knockback after playtest feedback.
 
 ## Version control
 This delivery includes source and a `git-baseline.bundle`, not editor caches.
@@ -58,3 +59,10 @@ eye from 1.65 to 0.85 m. Eye snaps with collider to avoid clipping under an obst
 Standing is rejected under a low ceiling; press the chord again after moving clear.
 Crouch itself does not change velocity or apply a speed penalty; standard movement/braking still
 operates. This is not the later slide/bunny-hop momentum system.
+
+## M04 health/damage testbed
+Player and orange dummy start at 100 HP. **H** damages the player by 25; **J** damages the dummy
+by 25, regardless of aim/range. These are temporary debug controls, not weapons. Holding a key
+should not repeatedly damage. HUD and overhead dummy text show HP/death. At zero HP the player
+loses controls. Stop and run again to reset. Respawn is M06; Sniper Tag/knockback is M05.
+Dead dummy remains collidable for now. No healing, scoring or death animation is implemented.

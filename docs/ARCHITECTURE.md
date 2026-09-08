@@ -26,3 +26,5 @@ Collider shape is duplicated per instance before editing. A full standing capsul
 excludes self and uses the player's collision mask. Failed stand leaves posture unchanged.
 Eye snaps with collider; movement/camera orientation owners remain unchanged. Queries and posture
 changes occur in the physics callback. No animation or separate movement state machine added.
+
+M04 HealthComponent owns current HP and is_dead; apply_damage returns actual HP removed. Invalid/nonpositive inputs rejected. Lethal state commits before signals to prevent reentrant duplicate death. Per-node state, no shared resource HP. PlayerController disables input on died and blocks movement/actions while dead, retaining gravity. DamageTestbed is scene-local debug input/HUD glue; remove debug hotkeys when production controls replace them. Dummy StaticBody retains collision on death until lifecycle milestone.

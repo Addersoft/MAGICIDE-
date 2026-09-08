@@ -25,3 +25,5 @@ momentum. Modifier precedence must be centralized before adding overlapping acti
 M02 tuning: sprint is 9 m/s in any input direction, including airborne; no stamina, acceleration,
 FOV change or buffered jump yet. Jump launch speed 7 m/s, gravity 20 m/s². These are tunable
 baseline choices, not finalized movement balance.
+
+M04 debug-only: H = 25 self damage; J = 25 dummy damage. Requires captured controls and living player. No weapon raycast. Death prevents recapture.

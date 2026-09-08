@@ -40,3 +40,6 @@ Run tests/m02_smoke.gd using the same command form. Then in the game:
 - Esc or focus loss blocks crouch. Check chord after recapture for accidental toggles.
 - Eye-height change currently snaps intentionally; report discomfort before adding smoothing.
 Run tests/m03_smoke.gd as well as M01/M02. No future systems should mask a failed acceptance test.
+
+## M04 manual acceptance
+Run tests/m04_smoke.gd. In F5 play: H once reduces your HP by 25, J once reduces dummy HP by 25. Hold each: no repeat. Four J presses mark dummy DEAD. Four H presses mark you DEAD and release capture; movement/jump/crouch/click cannot revive you. Stop/run restores both to 100. Confirm HUD readable and prior movement checks still pass. Debug damage ignores distance/aim by design; no Sniper Tag yet.

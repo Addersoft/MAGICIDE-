@@ -1,16 +1,25 @@
 extends Node3D
 ## Sole view orientation owner. Parent body never pitches.
+## Supports optional roll for Q/E parkour rolls (visual only; does not affect movement basis).
 @export_range(0.01, 1.0) var sensitivity_degrees: float = 0.12
 @export var invert_y: bool = false
+var _roll: float = 0.0
 
 func apply_look(delta_pixels: Vector2) -> void:
 	rotation.y = wrapf(rotation.y - deg_to_rad(delta_pixels.x * sensitivity_degrees), -PI, PI)
 	var vertical_sign: float = 1.0 if invert_y else -1.0
 	rotation.x = clampf(rotation.x + deg_to_rad(delta_pixels.y * sensitivity_degrees) * vertical_sign, deg_to_rad(-85.0), deg_to_rad(85.0))
+	_apply_roll()
 
 func horizontal_basis() -> Basis:
 	return Basis(Vector3.UP, rotation.y)
 
 func set_eye_height(height: float) -> void:
-	# Snap alongside collider: prevents the eye entering overhead geometry during crouch.
 	position.y = height
+
+func set_roll(angle: float) -> void:
+	_roll = angle
+	_apply_roll()
+
+func _apply_roll() -> void:
+	rotation.z = _roll

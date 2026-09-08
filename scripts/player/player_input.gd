@@ -55,7 +55,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_capture(true)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("primary_fire") and controls_active:
-		# Reserve Ctrl+LMB for future Link; it must not also fire Tag.
 		if not event.ctrl_pressed:
 			primary_requested.emit()
 		get_viewport().set_input_as_handled()
@@ -80,11 +79,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func jump_requested() -> bool:
 	return controls_active and Input.is_action_just_pressed("jump")
 
+func jump_held() -> bool:
+	return controls_active and Input.is_action_pressed("jump")
+
 func sprint_held() -> bool:
 	return controls_active and Input.is_action_pressed("sprint")
 
 func slide_requested() -> bool:
-	return controls_active and Input.is_action_just_pressed("crouch_modifier")
+	if not controls_active:
+		return false
+	if Input.is_action_just_pressed("parkour_slide"):
+		return true
+	return Input.is_action_just_pressed("crouch_modifier")
 
 func crouch_toggled() -> bool:
 	var held: bool = Input.is_action_pressed("crouch_modifier") and Input.is_action_pressed("move_backward")
@@ -92,7 +98,22 @@ func crouch_toggled() -> bool:
 	_crouch_chord_down = held
 	return controls_active and pressed
 
+func glide_held() -> bool:
+	if not controls_active:
+		return false
+	return Input.is_action_pressed("parkour_glide") and not Input.is_action_pressed("sprint")
+
+func dodge_requested() -> bool:
+	return controls_active and Input.is_action_just_pressed("parkour_dodge")
+
+func roll_left_requested() -> bool:
+	## Q — counter-clockwise / left roll
+	return controls_active and Input.is_action_just_pressed("roll_left")
+
+func roll_right_requested() -> bool:
+	## E — clockwise / right roll
+	return controls_active and Input.is_action_just_pressed("roll_right")
+
 func reset_for_respawn() -> void:
-	# Keep pointer released; a conscious click resumes play without firing.
 	set_capture(false)
 	_crouch_chord_down = Input.is_action_pressed("crouch_modifier") and Input.is_action_pressed("move_backward")

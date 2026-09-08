@@ -9,6 +9,7 @@ extends CharacterBody3D
 @onready var posture = $Posture
 @onready var health = $Health
 @onready var knockback = $Knockback
+@onready var broom = $Broom
 
 func _ready() -> void:
 	player_input.look_requested.connect(view.apply_look)
@@ -16,12 +17,38 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if health.is_dead:
+		if broom.mounted:
+			broom.force_dismount()
 		velocity.x = knockback.horizontal.x
 		velocity.z = knockback.horizontal.z
 		velocity.y = 0.0 if is_on_floor() and velocity.y <= 0.0 else velocity.y - gravity * delta
 		move_and_slide()
 		knockback.finish_step(self, delta)
 		return
+	if player_input.mount_toggled():
+		_toggle_mount()
+	if broom.mounted:
+		_broom_physics(delta)
+	else:
+		_foot_physics(delta)
+
+func _toggle_mount() -> void:
+	if broom.mounted:
+		broom.dismount()
+		return
+	if posture.crouched and not posture.toggle():
+		return
+	broom.mount()
+
+func _broom_physics(delta: float) -> void:
+	var axis: Vector2 = player_input.fly_axis()
+	var vertical: float = player_input.fly_vertical()
+	velocity = broom.integrate(delta, velocity, view.horizontal_basis(), axis, vertical, knockback.horizontal)
+	move_and_slide()
+	knockback.finish_step(self, delta)
+	broom.update_visual(delta, axis)
+
+func _foot_physics(delta: float) -> void:
 	if player_input.crouch_toggled():
 		posture.toggle()
 	var axis: Vector2 = player_input.movement_axis()
@@ -37,6 +64,7 @@ func _physics_process(delta: float) -> void:
 	knockback.finish_step(self, delta)
 
 func _on_died() -> void:
+	broom.force_dismount()
 	player_input.set_capture(false)
 
 func apply_knockback(impulse: Vector3) -> void:
@@ -46,6 +74,7 @@ func apply_knockback(impulse: Vector3) -> void:
 	velocity.y += impulse.y
 
 func reset_for_respawn(spawn: Transform3D) -> void:
+	broom.force_dismount()
 	global_transform = spawn
 	velocity = Vector3.ZERO
 	knockback.horizontal = Vector3.ZERO

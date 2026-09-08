@@ -12,7 +12,8 @@ No unused manager skeletons, autoloads or network framework. Input-to-movement s
 this is not prediction-ready multiplayer. State ownership must survive future extraction.
 
 Collision layer 1: solid world. Layer 2: player. Player mask 1, world mask 2.
-Arena dimensions: 40 x 40 m, boundary wall height 4 m. Units are metres.
+Arena dimensions: 40 x 40 m. M01–M08 walls were 4 m; M09 raised boundary walls to 16 m with a
+ceiling so hover cannot leave the box. Interior obstacles are unchanged. Units are metres.
 Definitions/resources contain authored values; no mutable actor state in shared Resources.
 Physics uses 60 ticks/s; velocities are metres/s, gravity metres/s². Mouse uses screen-relative
 pixel displacement without multiplying by frame delta. No third-person mode exists in M01.
@@ -73,3 +74,12 @@ owns cooldown, pending shot and the physics ray. Empty queue uses Tag damage; Ke
 damage then consume(); unsupported emits cast_failed and does not touch cooldown or the ray.
 PlayerInput emits rune_insert_requested(0..2) and rune_clear_requested. RuneHud and RuneBillboard are
 presentation. No autoload. No 24-rune script.
+
+M09: BroomController owns mounted state, hover integrate and the placeholder subject mesh.
+PlayerController remains the only move_and_slide caller and switches between _foot_physics and
+_broom_physics. Mounted motion_mode is FLOATING with gravity omitted; dismount restores GROUNDED.
+ChaseRig is a sibling camera: world-space spring 4 m behind / 2 m up, look-at the subject, world up,
+0.3 s blend from the eye. View/Camera3D stays the FPS camera and the combat aim origin.
+WASD on broom is look-relative; S is reverse; Space/Ctrl are climb/descend. F toggles mount.
+Death and respawn call force_dismount. Boost is not present.
+

@@ -92,3 +92,16 @@ Run tests/m08_smoke.gd plus prior fixtures. In F5 play:
 - One Kenaz then LMB: 16 damage, queue empties, 2 s cooldown.
 - Three Kenaz then LMB: 24 damage.
 - Camera stays first person. Round end still blocks insert/cast.
+
+## M09 acceptance
+Run tests/m09_smoke.gd plus prior fixtures. In F5 play:
+- On foot the camera is FPS. Press F: 0.3 s blend to third person, broom/body visible.
+- Hover: release WASD and the broom stops in about a quarter-second. S goes backward without turning.
+- Flick look 180 then hold W: you travel the new forward. The chase camera swings behind the broom
+  so the broom stays the subject (Warhawk-style), not a locked cockpit cam.
+- Space climbs, Ctrl descends, altitude holds when those are released (no gravity).
+- A/D strafe in the look frame. Camera stays upright; broom may roll slightly on strafe.
+- F dismounts to FPS. Dismount in air falls. Death/respawn force dismount.
+- Tag still aims from the eye, not from 4 m behind. Round end still blocks mount.
+Headless checks cannot prove camera comfort. Record that as Gate A.
+

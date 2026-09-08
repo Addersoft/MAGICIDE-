@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 [ext_resource type="PackedScene" path="res://scenes/arenas/arena_graybox.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/actors/dummy.tscn" id="3"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/match/round_manager.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/round_hud.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/ui/rune_hud.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/ui/broom_hud.gd" id="9"]
 [sub_resource type="Environment" id="Environment"]
 background_mode=1
 background_color=Color(0.08,0.11,0.16,1)
@@ -37,9 +38,9 @@ theme_override_colors/font_shadow_color=Color(0,0,0,1)
 theme_override_constants/shadow_offset_x=2
 theme_override_constants/shadow_offset_y=2
 theme_override_font_sizes/font_size=20
-text="WIZARDS!  /  M08 • v0.8.0
+text="WIZARDS!  /  M09 • v0.9.0
 WASD  Move     Mouse  Look     Esc  Release     Click  Capture
-Space  Jump     Hold Shift  Sprint     Ctrl+S  Toggle crouch
+Space  Jump / broom up     Hold Shift  Sprint     Ctrl+S  Crouch     F  Broom
 1  Kenaz     C  Clear queue     Empty LMB  Tag     Queued LMB  Cast"
 [node name="Crosshair" type="Label" parent="HUD"]
 anchors_preset=8
@@ -92,6 +93,15 @@ offset_bottom=320.0
 mouse_filter=2
 theme_override_font_sizes/font_size=20
 script=ExtResource("5")
+
+[node name="BroomStatus" type="Label" parent="HUD"]
+offset_left=24.0
+offset_top=320.0
+offset_right=1100.0
+offset_bottom=352.0
+mouse_filter=2
+theme_override_font_sizes/font_size=20
+script=ExtResource("9")
 
 [node name="RoundManager" type="Node" parent="."]
 script=ExtResource("6")

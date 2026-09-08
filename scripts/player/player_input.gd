@@ -27,6 +27,22 @@ func movement_axis() -> Vector2:
 	var backward: float = 0.0 if Input.is_action_pressed("crouch_modifier") else Input.get_action_strength("move_backward")
 	return Vector2(Input.get_axis("move_left", "move_right"), backward - Input.get_action_strength("move_forward")).limit_length(1.0)
 
+func fly_axis() -> Vector2:
+	if not controls_active:
+		return Vector2.ZERO
+	return Vector2(
+		Input.get_axis("move_left", "move_right"),
+		Input.get_action_strength("move_backward") - Input.get_action_strength("move_forward")
+	).limit_length(1.0)
+
+func fly_vertical() -> float:
+	if not controls_active:
+		return 0.0
+	return clampf(Input.get_action_strength("jump") - Input.get_action_strength("crouch_modifier"), -1.0, 1.0)
+
+func mount_toggled() -> bool:
+	return controls_active and Input.is_action_just_pressed("mount_broom")
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		set_capture(false)

@@ -13,7 +13,7 @@ var _pending: bool = false
 @onready var actor: CharacterBody3D = get_parent()
 @onready var health = actor.get_node("Health")
 @onready var controls = actor.get_node("PlayerInput")
-@onready var camera: Camera3D = actor.get_node("View/Camera3D")
+@onready var aim: Node3D = actor.get_node("View")
 @onready var rune_queue = actor.get_node("RuneQueue")
 
 func _ready() -> void:
@@ -61,8 +61,9 @@ func _physics_process(delta: float) -> void:
 		rune_queue.consume()
 	last_kind = kind
 	cooldown_remaining = TAG_COOLDOWN
-	var origin: Vector3 = camera.global_position
-	var direction: Vector3 = -camera.global_basis.z
+	# Aim from the eye View so a chase camera cannot fire from 4 m behind the caster.
+	var origin: Vector3 = aim.global_position
+	var direction: Vector3 = -aim.global_basis.z
 	var endpoint: Vector3 = origin + direction * QUERY_RANGE
 	var query := PhysicsRayQueryParameters3D.create(origin, endpoint, 3, [actor.get_rid()])
 	query.hit_from_inside = true

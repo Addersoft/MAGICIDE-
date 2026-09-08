@@ -1,20 +1,21 @@
 # PROJECT_STATE
-Milestone: M08 v0.8.0 implemented/reviewed; Gate A manual/export still pending.
+Milestone: M09 v0.9.0 implemented/reviewed; Gate A manual/export still pending.
 Engine: Godot 4.5 stable official, Compatibility, 60 Hz physics.
-Implemented M01–M08: arena/player/dummy, FPS move/jump/sprint/crouch, health/Tag/knockback,
-death/respawn, 3-minute practice round, Kenaz rune queue and Kenaz-only hitscan spell.
-No broom, parkour suite, burning zones, horses, destruction, cars, or 24-rune catalog.
-Next: verify M08 in editor, then either Isa as second rune or broom FPS→third-person proof.
-Do not treat Gate A or Kenaz “feel” as confirmed without a PC playtest.
+Implemented M01–M09: arena/player/dummy, FPS move/jump/sprint/crouch, health/Tag/knockback,
+death/respawn, 3-minute practice round, Kenaz rune queue, broom hover + Warhawk chase camera.
+No boost, parkour suite, burning zones, horses, destruction, cars, or 24-rune catalog.
+Next: verify M09 hover/camera in editor, then Isa as second rune or broom boost.
+Do not treat Gate A or broom “feel” as confirmed without a PC playtest.
 
-RuneQueue owns three slots, newest at index 0. Loadout[0] = kenaz; 2 and 3 unbound.
-SpellCatalog.resolve is side-effect free. CombatController still owns the physics ray and cooldown.
-Empty queue → Tag 12. Kenaz copies 1/2/3 → 16/20/24. Unsupported mix rejects without cooldown.
-Successful Kenaz consume()s the queue. C clears. Respawn clears. Dead/uncaptured cannot insert.
+BroomController owns mounted flag and hover integrate. ChaseRig owns the third-person camera.
+On foot: View/Camera3D current. Mounted: ChaseRig/Camera3D current, 4 m back 2 m up, spring follow.
+Hover 15 m/s, climb 8 m/s, damp 14, retrograde 1.6. F toggles mount. Death/respawn force dismount.
+Combat still aims from View. Empty queue Tag 12. Kenaz 16/20/24 unchanged.
 
-Paths: scripts/runes/*; data/runes/kenaz.tres; scripts/combat/combat_controller.gd;
-scripts/player/player_input.gd; scripts/ui/rune_hud.gd; scenes/player/player.tscn;
-tests/m08_smoke.gd; docs/decisions/ADR-008-rune-queue.md.
-Known bugs: none claimed beyond pending Gate A/export. Kenaz is hitscan, not fire volumes.
-Debt: local authority, debug H/J, fixed spawns, eye-origin shot, one bound rune, no final art.
-Decisions ADR-008. Checkpoint docs/checkpoints/M08.md. Retain first-person-on-foot rule.
+Paths: scripts/broom/broom_controller.gd; scripts/camera/broom_camera.gd;
+scripts/player/player_controller.gd; scripts/player/player_input.gd;
+scenes/player/player.tscn; scenes/arenas/arena_graybox.tscn; tests/m09_smoke.gd;
+docs/decisions/ADR-009-broom.md.
+Known bugs: none claimed beyond pending Gate A/export. Boost is not in this slice.
+Debt: local authority, debug H/J, placeholder broom mesh, hover-only, one bound rune.
+Decisions ADR-009. Checkpoint docs/checkpoints/M09.md. Retain first-person-on-foot rule.

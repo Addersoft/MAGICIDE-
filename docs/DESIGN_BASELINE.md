@@ -10,8 +10,9 @@ One state owner; small testable changes; no silent requirement changes; do not c
 First playable sequence: M01 movement testbed; M02 jump/sprint; M03 Ctrl+S toggle crouch
 preserving momentum; M04 health/damage; M05 Tag (12 damage, 2 s cooldown, zero mana,
 no intended arena range cap, knockback); M06 death/respawn; M07 3-minute round timer/dummy.
-Then M08–10 data-driven runes, HUD/overhead queue and first spell; M11–13 broom proof.
-Early multiplayer feasibility is planned before world content expansion, not implemented.
+Then M08 data-driven rune queue and Kenaz; M09 broom hover / Warhawk chase camera.
+Isa, boost, and remaining runes stay later. Early multiplayer feasibility is planned before
+world content expansion, not implemented.
 
 Vision retained: complete parkour suite, air control/bunny hop, teleport through walls with safe
 endpoint (5 m, 5 s cooldown, 0.1 s invulnerability), melee, wand/hat/link/bind abilities, stealth,

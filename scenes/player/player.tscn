@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/camera/player_camera.gd" id="3"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/actors/respawn_controller.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/runes/rune_queue.gd" id="9"]
 [ext_resource type="Script" path="res://scripts/runes/rune_billboard.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/broom/broom_controller.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/camera/broom_camera.gd" id="12"]
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius=0.35
 height=1.8
@@ -48,6 +50,19 @@ script=ExtResource("8")
 
 [node name="RuneQueue" type="Node" parent="."]
 script=ExtResource("9")
+
+[node name="Broom" type="Node" parent="."]
+script=ExtResource("11")
+
+[node name="BroomVisual" type="Node3D" parent="."]
+visible=false
+
+[node name="ChaseRig" type="Node3D" parent="."]
+script=ExtResource("12")
+[node name="Camera3D" type="Camera3D" parent="ChaseRig"]
+current=false
+fov=72.0
+near=0.05
 
 [node name="RuneBillboard" type="Node3D" parent="."]
 position=Vector3(0, 2.15, 0)

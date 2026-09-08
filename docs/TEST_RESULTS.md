@@ -73,3 +73,12 @@ M08 23 checks pass, exit 0; total 124. Covers empty Tag regression, unbound 2/3,
 cap/discard, C clear, Kenaz 16/24 consume, 2 s cooldown, unsupported mix reject/keep/fail signal,
 death blocks insert, respawn clears queue.
 Not tested: GPU, Kenaz feel, fire volumes, loadout UI, export, Gate A playtest.
+
+## M09 v0.9.0
+Godot 4.5 stable official 876b29033 Linux headless. Editor import exit 0. All earlier 124 checks pass.
+M09 30 checks pass, exit 0; total 154. Covers F mount/dismount, chase vs FPS camera, visible subject,
+floating motion, climb, altitude hold, 15 m/s hover, W forward, stop-on-a-dime, S reverse, A/D strafe,
+180 yaw new forward, instant retrograde, camera above/behind subject, Ctrl descend, air dismount gravity,
+remount, death force-dismount, respawn on foot.
+Not tested: GPU, broom camera comfort, boost, export, Gate A playtest.
+

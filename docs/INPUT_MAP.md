@@ -2,25 +2,27 @@
 | Action | Physical default | Implemented |
 |---|---|---|
 | move_forward | W | Yes |
-| move_backward | S | Yes |
-| move_left | A | Yes |
-| move_right | D | Yes |
+| move_backward | S | Yes. On broom this is reverse, including with Ctrl held. |
+| move_left | A | Yes. On broom: strafe left. |
+| move_right | D | Yes. On broom: strafe right. |
 | release_mouse | Escape | Yes |
 | Capture | Left mouse, when released | Yes |
 | Look | Mouse motion | Yes |
-| Crouch toggle | CTRL+S | Yes, rising chord edge |
-| jump | Space | Yes, ground only, fresh press |
-| sprint | Shift | Yes, hold |
+| Crouch toggle | CTRL+S | Yes on foot. Ignored while mounted (Ctrl is descend). |
+| jump | Space | Yes, ground only on foot. On broom: climb (held). |
+| sprint | Shift | Yes on foot. Ignored on broom (boost is later). |
+| mount_broom | F | Yes, toggle mount/dismount |
 
-Movement is disabled while capture is released; gravity continues. Focus loss releases capture.
+Movement is disabled while capture is released; gravity continues on foot. Focus loss releases capture.
 First motion after recapture is discarded to avoid a warp delta. View pitch limits ±85 degrees.
 
 Reserved future design: Space jump; Shift sprint; CTRL+S crouch toggle; LMB empty-queue Tag /
 nonempty-queue cast; 1/2/3 rune insertion; C clear; Q teleport; V invisibility; R detection;
 Shift+RMB block; MMB wand throw; Ctrl+Space hat; F harness/finisher; Ctrl+LMB link;
-Ctrl+RMB bind/pull. Broom mount binding unresolved.
-M03: Ctrl+S is reserved for crouch, so S does not command backward motion while Ctrl is held. Crouch itself must not reset
-momentum. Modifier precedence must be centralized before adding overlapping actions.
+Ctrl+RMB bind/pull.
+M09 uses F as broom mount/dismount (Harness). Boost remains unbound.
+M03: Ctrl+S is reserved for crouch, so S does not command backward motion while Ctrl is held on foot.
+On broom, S is always reverse and Ctrl is descend; they may combine.
 
 M02 tuning: sprint is 9 m/s in any input direction, including airborne; no stamina, acceleration,
 FOV change or buffered jump yet. Jump launch speed 7 m/s, gravity 20 m/s². These are tunable
@@ -43,3 +45,6 @@ reloads scene and uses normal initial capture. Escape during play does not pause
 M08: rune_1 / rune_2 / rune_3 = physical 1/2/3. rune_clear = C. Only bind 1 is Kenaz in this
 slice; 2 and 3 no-op. Inserts require captured living controls. C does not shoot. Empty LMB is
 still Tag. Queued LMB is a cast. Ctrl+LMB remains reserved.
+
+M09: mount_broom = F. Hover uses WASD look-relative, Space up, Ctrl down. Mouse still aims.
+On-foot FPS look/move bindings are unchanged.

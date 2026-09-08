@@ -1,6 +1,5 @@
 extends Node
-## Hover + boost flight. WASD follows full camera aim (pitch counts).
-## Space / Ctrl climb and descend at the same rate.
+## Hover + boost. WASD follows look. Q/E bank/roll the broom (aileron).
 signal mount_changed(mounted: bool)
 @export var hover_speed: float = 15.0
 @export var boost_speed: float = 40.0
@@ -9,7 +8,7 @@ signal mount_changed(mounted: bool)
 @export var boost_damp: float = 14.0
 @export var retrograde: float = 2.2
 @export var altitude_lock: float = 36.0
-@export var visual_roll_degrees: float = 28.0
+@export var visual_roll_degrees: float = 55.0
 @export var turn_bank_gain: float = 0.38
 var mounted: bool = false
 var boosting: bool = false
@@ -63,7 +62,7 @@ func force_dismount() -> void:
 	mounted = false
 	boosting = false
 	actor.motion_mode = CharacterBody3D.MOTION_MODE_GROUNDED
-	actor.floor_snap_length = 0.2
+	actor.floor_snap_length = 0.55
 	visual.visible = false
 	visual.rotation = Vector3.ZERO
 	roll = 0.0
@@ -74,7 +73,7 @@ func force_dismount() -> void:
 	if was_mounted:
 		mount_changed.emit(false)
 
-func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2, vertical: float, knock_h: Vector3, boost: bool = false) -> Vector3:
+func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2, vertical: float, knock_h: Vector3, boost: bool = false, aileron: float = 0.0) -> Vector3:
 	boosting = boost and mounted
 	var speed: float = boost_speed if boosting else hover_speed
 	var rate: float = boost_damp if boosting else damp
@@ -89,9 +88,11 @@ func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2,
 		right = right.normalized()
 	else:
 		right = Vector3.RIGHT
-	# axis.y is negative when W is held — flip so W goes along camera forward.
+	# axis.y is negative when W is held — W along camera forward (pitch included).
 	var wish: Vector3 = (right * axis.x + forward * (-axis.y)) * speed
 	wish.y += vertical * climb_speed
+	# Q/E aileron: bank-slide in the roll direction (Q left, E right).
+	wish += right * aileron * speed * 0.45
 	var alpha: float = 1.0 - exp(-rate * delta)
 	var planar_cur := Vector3(current.x, 0.0, current.z)
 	var planar_wish := Vector3(wish.x, 0.0, wish.z)
@@ -105,12 +106,14 @@ func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2,
 	next.z += knock_h.z
 	return next
 
-func update_visual(delta: float, axis: Vector2) -> void:
+func update_visual(delta: float, axis: Vector2, aileron: float = 0.0) -> void:
 	if not mounted:
 		return
 	var turn_bank: float = clampf(_yaw_rate * turn_bank_gain, -1.0, 1.0)
-	var target_roll: float = clampf(-axis.x + turn_bank, -1.0, 1.0) * deg_to_rad(visual_roll_degrees)
-	roll = lerpf(roll, target_roll, 1.0 - exp(-12.0 * delta))
+	# Q/E dominate roll. A/D and mouse yaw add a little extra bank.
+	var stick: float = clampf(aileron + axis.x * 0.25 + turn_bank * 0.35, -1.0, 1.0)
+	var target_roll: float = stick * deg_to_rad(visual_roll_degrees)
+	roll = lerpf(roll, target_roll, 1.0 - exp(-14.0 * delta))
 	visual.rotation = Vector3(view.rotation.x, view.rotation.y, roll)
 	if _trail and _trail.emitting:
 		_set_trail_color(COLOR_BOOST if boosting else COLOR_IDLE)

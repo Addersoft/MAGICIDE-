@@ -3,6 +3,7 @@ extends CharacterBody3D
 @export var sprint_speed: float = 16.0
 @export var jump_speed: float = 9.5
 @export var gravity: float = 22.0
+const FOOT_SNAP: float = 0.55
 @onready var player_input = $PlayerInput
 @onready var view = $View
 @onready var posture = $Posture
@@ -14,6 +15,7 @@ extends CharacterBody3D
 func _ready() -> void:
 	player_input.look_requested.connect(view.apply_look)
 	health.died.connect(_on_died)
+	floor_snap_length = FOOT_SNAP
 
 func _physics_process(delta: float) -> void:
 	if health.is_dead:
@@ -39,6 +41,7 @@ func _physics_process(delta: float) -> void:
 func _toggle_mount() -> void:
 	if broom.mounted:
 		broom.dismount()
+		floor_snap_length = FOOT_SNAP
 		return
 	if posture.sliding:
 		posture.end_slide()
@@ -56,13 +59,14 @@ func _broom_physics(delta: float) -> void:
 	var axis: Vector2 = player_input.fly_axis()
 	var vertical: float = player_input.fly_vertical()
 	var boost: bool = player_input.boost_held()
-	velocity = broom.integrate(delta, velocity, view.global_transform.basis, axis, vertical, knockback.horizontal, boost)
+	var aileron: float = player_input.roll_axis()
+	velocity = broom.integrate(delta, velocity, view.global_transform.basis, axis, vertical, knockback.horizontal, boost, aileron)
 	move_and_slide()
 	knockback.finish_step(self, delta)
-	broom.update_visual(delta, axis)
+	broom.update_visual(delta, axis, aileron)
 
 func _foot_physics(delta: float) -> void:
-	if not posture.sliding:
+	if motor.roll_time <= 0.0 and not posture.sliding:
 		var want_crouch: bool = player_input.crouch_held() and not player_input.slide_held()
 		posture.set_crouched(want_crouch)
 	var desired: Vector3 = motor.step(delta, false)
@@ -95,6 +99,7 @@ func reset_for_respawn(spawn: Transform3D) -> void:
 	global_transform = spawn
 	velocity = Vector3.ZERO
 	knockback.horizontal = Vector3.ZERO
+	floor_snap_length = FOOT_SNAP
 	if motor:
 		motor.reset()
 	posture.reset_standing()

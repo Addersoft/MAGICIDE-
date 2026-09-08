@@ -129,5 +129,16 @@ func roll_left_requested() -> bool:
 func roll_right_requested() -> bool:
 	return controls_active and Input.is_action_just_pressed("roll_right")
 
+## Held Q/E for broom aileron. −1 = Q (roll left), +1 = E (roll right).
+func roll_axis() -> float:
+	if not controls_active:
+		return 0.0
+	var v: float = 0.0
+	if Input.is_action_pressed("roll_left"):
+		v -= 1.0
+	if Input.is_action_pressed("roll_right"):
+		v += 1.0
+	return v
+
 func reset_for_respawn() -> void:
 	set_capture(false)

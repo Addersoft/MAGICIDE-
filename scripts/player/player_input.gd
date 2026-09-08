@@ -1,6 +1,5 @@
 extends Node
 ## Raw input ownership. No movement or camera transforms here.
-## Combat and movement share keys without mutually canceling each other.
 signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
@@ -52,7 +51,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_capture(true)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("primary_fire") and controls_active:
-		# Always allow fire while captured — including mid-slide / mid-sprint (Ctrl held).
 		primary_requested.emit()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_1") and controls_active:
@@ -84,6 +82,9 @@ func sprint_held() -> bool:
 
 func boost_held() -> bool:
 	return controls_active and Input.is_action_pressed("sprint")
+
+func shield_held() -> bool:
+	return controls_active and Input.is_action_pressed("shield")
 
 func crouch_toggled() -> bool:
 	if not controls_active or not Input.is_action_just_pressed("crouch_modifier"):
@@ -122,7 +123,7 @@ func slide_requested() -> bool:
 func glide_held() -> bool:
 	if not controls_active:
 		return false
-	return Input.is_action_pressed("parkour_glide") and not Input.is_action_pressed("sprint")
+	return Input.is_action_pressed("parkour_glide") and not Input.is_action_pressed("sprint") and not Input.is_action_pressed("shield")
 
 func dodge_requested() -> bool:
 	return controls_active and Input.is_action_just_pressed("parkour_dodge")

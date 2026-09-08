@@ -14,9 +14,11 @@ func _ready() -> void:
 func apply_damage(amount: float) -> float:
 	if not damage_enabled or is_dead or not is_finite(amount) or amount <= 0.0:
 		return 0.0
+	var combat = get_parent().get_node_or_null("Combat")
+	if combat != null and combat.get("shielding") == true:
+		return 0.0
 	var applied: float = minf(amount, current_health)
 	current_health = maxf(0.0, current_health - applied)
-	# Commit death before notifying listeners, including reentrant damage callbacks.
 	var lethal: bool = current_health == 0.0
 	if lethal:
 		is_dead = true
@@ -26,7 +28,6 @@ func apply_damage(amount: float) -> float:
 	return applied
 
 func reset_full() -> void:
-	# Lifecycle-only: callers must reset physical/action state before restoring health.
 	is_dead = false
 	current_health = max_health
 	health_changed.emit(current_health, max_health)

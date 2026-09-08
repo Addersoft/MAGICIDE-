@@ -1,5 +1,4 @@
 extends CharacterBody3D
-## Sole velocity and move_and_slide owner. Delegates on-foot locomotion to ParkourMotor.
 @export var walk_speed: float = 10.0
 @export var sprint_speed: float = 16.0
 @export var jump_speed: float = 9.5
@@ -43,8 +42,8 @@ func _toggle_mount() -> void:
 		return
 	if posture.sliding:
 		posture.end_slide()
-	if posture.crouched and not posture.toggle():
-		return
+	if posture.crouched:
+		posture.set_crouched(false)
 	if motor:
 		motor.reset()
 	broom.mount()
@@ -63,10 +62,10 @@ func _broom_physics(delta: float) -> void:
 	broom.update_visual(delta, axis)
 
 func _foot_physics(delta: float) -> void:
-	var crouch_tap: bool = player_input.crouch_toggled()
-	if crouch_tap and not posture.sliding:
-		posture.toggle()
-	var desired: Vector3 = motor.step(delta, crouch_tap)
+	if not posture.sliding:
+		var want_crouch: bool = player_input.crouch_held() and not player_input.slide_held()
+		posture.set_crouched(want_crouch)
+	var desired: Vector3 = motor.step(delta, false)
 	velocity.x = desired.x + knockback.horizontal.x
 	velocity.y = desired.y
 	velocity.z = desired.z + knockback.horizontal.z

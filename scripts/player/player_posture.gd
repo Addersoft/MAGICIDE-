@@ -27,14 +27,19 @@ func _apply_height(height: float, eye: float) -> void:
 	collider.position.y = height / 2.0
 	view.set_eye_height(eye)
 
-func toggle() -> bool:
-	if crouched and not can_stand():
+func set_crouched(want: bool) -> bool:
+	if sliding:
 		return false
-	crouched = not crouched
-	sliding = false
-	var height: float = CROUCH_HEIGHT if crouched else STANDING_HEIGHT
-	_apply_height(height, 0.85 if crouched else 1.65)
+	if want == crouched:
+		return true
+	if not want and not can_stand():
+		return false
+	crouched = want
+	_apply_height(CROUCH_HEIGHT if crouched else STANDING_HEIGHT, 0.85 if crouched else 1.65)
 	return true
+
+func toggle() -> bool:
+	return set_crouched(not crouched)
 
 func begin_slide() -> void:
 	sliding = true
@@ -53,7 +58,6 @@ func end_slide() -> void:
 		_apply_height(CROUCH_HEIGHT, 0.85)
 
 func reset_standing() -> void:
-	# Respawn owner has already validated the full standing capsule at the spawn.
 	crouched = false
 	sliding = false
 	_apply_height(STANDING_HEIGHT, 1.65)

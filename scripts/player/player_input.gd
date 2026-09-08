@@ -1,5 +1,4 @@
 extends Node
-## Raw input ownership. No movement or camera transforms here.
 signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
@@ -86,15 +85,11 @@ func boost_held() -> bool:
 func shield_held() -> bool:
 	return controls_active and Input.is_action_pressed("shield")
 
+func crouch_held() -> bool:
+	return controls_active and Input.is_action_pressed("crouch_modifier")
+
 func crouch_toggled() -> bool:
-	if not controls_active or not Input.is_action_just_pressed("crouch_modifier"):
-		return false
-	var axis := movement_axis()
-	var planar_speed := 0.0
-	var body = get_parent()
-	if body is CharacterBody3D:
-		planar_speed = Vector2(body.velocity.x, body.velocity.z).length()
-	return axis.length() < 0.25 and planar_speed < 3.5
+	return false
 
 func slide_held() -> bool:
 	if not controls_active or not Input.is_action_pressed("crouch_modifier"):

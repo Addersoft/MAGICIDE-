@@ -1,7 +1,7 @@
-# WIZARDS! — M09 v0.9.0
-PC Godot source project. Includes M01–M09: FPS movement, jump/sprint/crouch, health,
+# WIZARDS! — M10
+PC Godot source project. Includes M01–M10: FPS movement, jump/sprint/crouch/slide, health,
 Sniper Tag, knockback, automatic respawn, timed practice rounds, Kenaz rune queue,
-and broom hover with a Warhawk-style third-person chase camera.
+and broom hover with a Warhawk (2007) third-person chase camera.
 Not an HTML game or exported executable.
 
 ## Run
@@ -20,7 +20,9 @@ Godot 4.5 is pinned for reproducibility, not claimed to be the latest version.
 | WASD / mouse | On foot: move / aim FPS. On broom: look-relative strafe/forward/back |
 | Space | Ground jump on foot. Climb while mounted (held). |
 | Hold Shift | Sprint on foot. Unbound on broom (boost is later). |
-| Ctrl+S | Toggle crouch on foot. On broom: Ctrl descends, S still reverses. |
+| Ctrl (walk/run) | Slide on foot. |
+| Ctrl+S (still) | Toggle crouch on foot. |
+| Ctrl (mounted) | Descend. S still reverses. |
 | F | Mount / dismount broom |
 | 1 | Insert Kenaz at slot 1 (newest). 2 and 3 are unbound. |
 | C | Clear the rune queue (does not shoot) |
@@ -45,27 +47,27 @@ Click to resume after player respawn; the click does not shoot. Respawn clears l
 
 Crouch uses a 1 m capsule and .85 m eye; standing uses 1.8 m and 1.65 m. Eye height snaps
 with collider to avoid clipping under roofs. Blocked standing requires retry after moving clear.
-Ctrl+S reserves S from backward input while Ctrl is held. Crouch adds no speed penalty.
+Ctrl while walking or running is a short slide (low capsule, extra speed). Stationary Ctrl+S
+still toggles crouch and still reserves S from backward input. Crouch adds no speed penalty.
 Walk 6 m/s; sprint 9 m/s; jump launch 7 m/s; gravity 20 m/s². These remain tunable baselines.
 
-## M09 broom
-Press **F** to mount. The camera blends in **0.3 s** to a chase cam about **4 m behind and 2 m above**.
-You are the subject: the broom stays in frame, the camera lags slightly when you yaw (Warhawk 2007),
-and it stays world-upright. Press F again to return to first person.
+## M09/M10 broom — Warhawk camera
+Press **F** to mount. The camera blends in **0.3 s** to a chase cam about **4 m behind**.
+You are the subject. This is Incognito's Warhawk (2007) chase, not a world-up look-at:
 
-Hover is an anti-gravity bubble, not an airplane:
-- **15 m/s** max, look-relative WASD
-- **S** is reverse. You do not have to turn around.
-- Release movement: stop on a dime (short damp, not a long coast)
-- Flick look 180 then W: new forward immediately
-- Space up, Ctrl down; altitude holds when you let go
-- Boost, broom HP and banked jet mode are not in this slice
+- Mouse aim is instant on the wand/eye.
+- The chase camera **lags ~133 ms** catching up to wherever the mouse points.
+- The camera **banks with the broom** (strafe + turn-rate roll). Horizon is not locked.
+- Flick look 180 while moving: travel **redirects on a dime** with the nose.
+- **S** is reverse. Release WASD: stop on a dime.
+- Space up, Ctrl down; altitude holds when you let go.
+- Boost, broom HP and jet mode are not in this slice.
 
 Arena walls are 16 m with a ceiling so hover cannot leave the graybox. Interior blocks are unchanged.
 Tag still fires from the eye, not from the chase camera. Death and respawn force a dismount.
 
 ## Verification
-Godot 4.5 stable Linux headless: editor import and checks across M01–M09 fixtures.
+Godot 4.5 stable Linux headless: editor import and checks across M01–M10 fixtures.
 No GPU rendering, camera comfort, target-PC mouse/focus, exported executable, or render-cap
 comparison is confirmed. See docs/TEST_RESULTS.md and docs/TEST_PLAN.md.
 
@@ -81,11 +83,12 @@ godot --headless --path . --script res://tests/m06_smoke.gd
 godot --headless --path . --script res://tests/m07_smoke.gd
 godot --headless --path . --script res://tests/m08_smoke.gd
 godot --headless --path . --script res://tests/m09_smoke.gd
+godot --headless --path . --script res://tests/m10_smoke.gd
 ```
 Each runner should report zero failures and exit 0. Manual testing remains necessary.
 
 ## Continue
-Read docs/PROJECT_STATE.md first. Next after M09 hover feel is accepted: **Isa as second rune** or
+Read docs/PROJECT_STATE.md first. Next after M10 camera/flight feel is accepted: **Isa as second rune** or
 **broom boost**. Gate A playtest and standalone export remain open.
 Runes beyond Kenaz, boost, cars, concentric rings and souls are not implemented.
 Use this working copy, not two independently edited copies. Engine caches are excluded.

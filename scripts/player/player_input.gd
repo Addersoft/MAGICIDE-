@@ -83,6 +83,9 @@ func jump_requested() -> bool:
 func sprint_held() -> bool:
 	return controls_active and Input.is_action_pressed("sprint")
 
+func slide_requested() -> bool:
+	return controls_active and Input.is_action_just_pressed("crouch_modifier")
+
 func crouch_toggled() -> bool:
 	var held: bool = Input.is_action_pressed("crouch_modifier") and Input.is_action_pressed("move_backward")
 	var pressed: bool = held and not _crouch_chord_down

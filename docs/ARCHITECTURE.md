@@ -27,6 +27,7 @@ Collider shape is duplicated per instance before editing. A full standing capsul
 excludes self and uses the player's collision mask. Failed stand leaves posture unchanged.
 Eye snaps with collider; movement/camera orientation owners remain unchanged. Queries and posture
 changes occur in the physics callback. No animation or separate movement state machine added.
+M10: Posture also owns sliding (same low capsule as crouch). Slide velocity stays in PlayerController.
 
 M04 HealthComponent owns current HP and is_dead; apply_damage returns actual HP removed. Invalid/nonpositive inputs rejected. Lethal state commits before signals to prevent reentrant duplicate death. Per-node state, no shared resource HP. PlayerController disables input on died and blocks movement/actions while dead, retaining gravity. DamageTestbed is scene-local debug input/HUD glue; remove debug hotkeys when production controls replace them. Dummy StaticBody retains collision on death until lifecycle milestone.
 
@@ -78,8 +79,11 @@ presentation. No autoload. No 24-rune script.
 M09: BroomController owns mounted state, hover integrate and the placeholder subject mesh.
 PlayerController remains the only move_and_slide caller and switches between _foot_physics and
 _broom_physics. Mounted motion_mode is FLOATING with gravity omitted; dismount restores GROUNDED.
-ChaseRig is a sibling camera: world-space spring 4 m behind / 2 m up, look-at the subject, world up,
-0.3 s blend from the eye. View/Camera3D stays the FPS camera and the combat aim origin.
+View/Camera3D stays the FPS camera and the combat aim origin.
 WASD on broom is look-relative; S is reverse; Space/Ctrl are climb/descend. F toggles mount.
 Death and respawn call force_dismount. Boost is not present.
 
+M10: ChaseRig copies View yaw/pitch plus broom roll with an exponential look lag (~133 ms) instead of
+look_at(..., WORLD_UP). Boom position is in that lagged basis. Hover planar velocity is rotated by
+look-yaw delta so a 180 flick reverses travel. On-foot Ctrl while moving starts a posture slide;
+stationary Ctrl+S remains crouch. Mounted Ctrl is still descend.

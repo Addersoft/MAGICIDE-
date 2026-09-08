@@ -3,12 +3,13 @@
 |---|---|---|
 | move_forward | W | Yes |
 | move_backward | S | Yes. On broom this is reverse, including with Ctrl held. |
-| move_left | A | Yes. On broom: strafe left. |
-| move_right | D | Yes. On broom: strafe right. |
+| move_left | A | Yes. On broom: strafe left (also banks). |
+| move_right | D | Yes. On broom: strafe right (also banks). |
 | release_mouse | Escape | Yes |
 | Capture | Left mouse, when released | Yes |
-| Look | Mouse motion | Yes |
-| Crouch toggle | CTRL+S | Yes on foot. Ignored while mounted (Ctrl is descend). |
+| Look | Mouse motion | Yes. Instant on View/aim. Chase camera lags ~133 ms and follows roll. |
+| Crouch toggle | CTRL+S | Yes on foot when still. Ignored while mounted (Ctrl is descend). |
+| Slide | CTRL while walking/running | Yes on foot, grounded. Mounted Ctrl is descend, not slide. |
 | jump | Space | Yes, ground only on foot. On broom: climb (held). |
 | sprint | Shift | Yes on foot. Ignored on broom (boost is later). |
 | mount_broom | F | Yes, toggle mount/dismount |
@@ -22,6 +23,7 @@ Shift+RMB block; MMB wand throw; Ctrl+Space hat; F harness/finisher; Ctrl+LMB li
 Ctrl+RMB bind/pull.
 M09 uses F as broom mount/dismount (Harness). Boost remains unbound.
 M03: Ctrl+S is reserved for crouch, so S does not command backward motion while Ctrl is held on foot.
+M10: Ctrl while walking or running is slide. Stationary Ctrl+S is still crouch.
 On broom, S is always reverse and Ctrl is descend; they may combine.
 
 M02 tuning: sprint is 9 m/s in any input direction, including airborne; no stamina, acceleration,
@@ -48,3 +50,5 @@ still Tag. Queued LMB is a cast. Ctrl+LMB remains reserved.
 
 M09: mount_broom = F. Hover uses WASD look-relative, Space up, Ctrl down. Mouse still aims.
 On-foot FPS look/move bindings are unchanged.
+
+M10: chase cam follows roll and lags mouse. Hover velocity yaws with look. On-foot Ctrl-while-moving is slide.

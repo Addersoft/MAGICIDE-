@@ -1,10 +1,10 @@
 extends Node
-## Hover + boost flight owner. PlayerController remains the only move_and_slide caller.
-## Fire trail is always on while mounted; turns blue when boost (Shift) is active.
+## Hover + boost flight. WASD follows full camera aim (pitch counts).
+## Space / Ctrl climb and descend at the same rate.
 signal mount_changed(mounted: bool)
 @export var hover_speed: float = 15.0
 @export var boost_speed: float = 40.0
-@export var climb_speed: float = 8.0
+@export var climb_speed: float = 10.0
 @export var damp: float = 22.0
 @export var boost_damp: float = 14.0
 @export var retrograde: float = 2.2
@@ -74,27 +74,32 @@ func force_dismount() -> void:
 	if was_mounted:
 		mount_changed.emit(false)
 
-func integrate(delta: float, current: Vector3, yaw_basis: Basis, axis: Vector2, vertical: float, knock_h: Vector3, boost: bool = false) -> Vector3:
+func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2, vertical: float, knock_h: Vector3, boost: bool = false) -> Vector3:
 	boosting = boost and mounted
 	var speed: float = boost_speed if boosting else hover_speed
 	var rate: float = boost_damp if boosting else damp
-	var look_yaw: float = yaw_basis.get_euler().y
+	var look_yaw: float = look_basis.get_euler().y
 	var dyaw: float = wrapf(look_yaw - _look_yaw, -PI, PI)
 	_yaw_rate = dyaw / maxf(delta, 0.0001)
 	_look_yaw = look_yaw
-	var planar := Basis(Vector3.UP, dyaw) * Vector3(current.x, 0.0, current.z)
-	var desired_h: Vector3 = yaw_basis * Vector3(axis.x, 0.0, axis.y) * speed
-	var desired := Vector3(desired_h.x, vertical * climb_speed, desired_h.z)
-	if desired_h.dot(planar) < 0.0 and planar.length() > 0.5:
-		rate *= retrograde
+	var forward: Vector3 = -look_basis.z
+	var right: Vector3 = look_basis.x
+	right.y = 0.0
+	if right.length_squared() > 0.0001:
+		right = right.normalized()
+	else:
+		right = Vector3.RIGHT
+	var wish: Vector3 = (right * axis.x + forward * axis.y) * speed
+	wish.y += vertical * climb_speed
 	var alpha: float = 1.0 - exp(-rate * delta)
-	var next := Vector3(
-		lerpf(planar.x, desired.x, alpha),
-		0.0,
-		lerpf(planar.z, desired.z, alpha)
-	)
-	var y_rate: float = altitude_lock if absf(vertical) < 0.01 else damp
-	next.y = lerpf(current.y, desired.y, 1.0 - exp(-y_rate * delta))
+	var planar_cur := Vector3(current.x, 0.0, current.z)
+	var planar_wish := Vector3(wish.x, 0.0, wish.z)
+	if planar_wish.dot(planar_cur) < 0.0 and planar_cur.length() > 0.5:
+		alpha = 1.0 - exp(-rate * retrograde * delta)
+	var next := current.lerp(wish, alpha)
+	var pitch_drive: float = absf(forward.y * axis.y * speed)
+	if absf(vertical) < 0.01 and pitch_drive < 0.5:
+		next.y = lerpf(current.y, 0.0, 1.0 - exp(-altitude_lock * delta))
 	next.x += knock_h.x
 	next.z += knock_h.z
 	return next
@@ -130,7 +135,6 @@ func _build_trail() -> void:
 	_trail.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
 	_trail.emitting = false
 	_trail.position = Vector3(0.0, 0.42, 1.15)
-
 	_trail_mat = ParticleProcessMaterial.new()
 	_trail_mat.direction = Vector3(0, 0, 1)
 	_trail_mat.spread = 18.0
@@ -143,7 +147,6 @@ func _build_trail() -> void:
 	_trail_mat.scale_max = 0.22
 	_trail_mat.color = COLOR_IDLE
 	_trail.process_material = _trail_mat
-
 	var mesh := SphereMesh.new()
 	mesh.radius = 0.06
 	mesh.height = 0.12
@@ -156,7 +159,6 @@ func _build_trail() -> void:
 	_trail_draw.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mesh.material = _trail_draw
 	_trail.draw_pass_1 = mesh
-
 	visual.add_child(_trail)
 
 func _build_placeholder() -> void:

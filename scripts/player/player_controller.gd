@@ -1,9 +1,8 @@
 extends CharacterBody3D
 ## Sole velocity and move_and_slide owner. Delegates on-foot locomotion to ParkourMotor.
-## Speeds tuned toward Mirror's Edge / TF2 Scout free-run feel.
 @export var walk_speed: float = 10.0
 @export var sprint_speed: float = 16.0
-@export var jump_speed: float = 9.0
+@export var jump_speed: float = 9.5
 @export var gravity: float = 22.0
 @onready var player_input = $PlayerInput
 @onready var view = $View
@@ -58,7 +57,7 @@ func _broom_physics(delta: float) -> void:
 	var axis: Vector2 = player_input.fly_axis()
 	var vertical: float = player_input.fly_vertical()
 	var boost: bool = player_input.boost_held()
-	velocity = broom.integrate(delta, velocity, view.horizontal_basis(), axis, vertical, knockback.horizontal, boost)
+	velocity = broom.integrate(delta, velocity, view.global_transform.basis, axis, vertical, knockback.horizontal, boost)
 	move_and_slide()
 	knockback.finish_step(self, delta)
 	broom.update_visual(delta, axis)

@@ -89,7 +89,8 @@ func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2,
 		right = right.normalized()
 	else:
 		right = Vector3.RIGHT
-	var wish: Vector3 = (right * axis.x + forward * axis.y) * speed
+	# axis.y is negative when W is held — flip so W goes along camera forward.
+	var wish: Vector3 = (right * axis.x + forward * (-axis.y)) * speed
 	wish.y += vertical * climb_speed
 	var alpha: float = 1.0 - exp(-rate * delta)
 	var planar_cur := Vector3(current.x, 0.0, current.z)
@@ -97,7 +98,7 @@ func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2,
 	if planar_wish.dot(planar_cur) < 0.0 and planar_cur.length() > 0.5:
 		alpha = 1.0 - exp(-rate * retrograde * delta)
 	var next := current.lerp(wish, alpha)
-	var pitch_drive: float = absf(forward.y * axis.y * speed)
+	var pitch_drive: float = absf(forward.y * (-axis.y) * speed)
 	if absf(vertical) < 0.01 and pitch_drive < 0.5:
 		next.y = lerpf(current.y, 0.0, 1.0 - exp(-altitude_lock * delta))
 	next.x += knock_h.x

@@ -1,14 +1,18 @@
 extends Node
 ## Local attack authority. Empty queue is Tag; Kenaz-only queues are the M08 spell.
+## Presentation: last_origin / last_hit feed WandPresentation + SpiralBeam (no damage authority there).
 signal combat_reset
 signal shot_resolved(hit_position: Vector3, damage: float)
 signal cast_failed(reason: String)
 const TAG_DAMAGE: float = 12.0
 const TAG_COOLDOWN: float = 2.0
-const QUERY_RANGE: float = 1000.0 # Covers the bounded 40 m arena; no damage falloff.
+const QUERY_RANGE: float = 1000.0
 const KNOCKBACK_SPEED: float = 5.0
+const MUZZLE_LOCAL := Vector3(0.22, -0.23, -0.57)
 var cooldown_remaining: float = 0.0
 var last_kind: String = "tag"
+var last_origin: Vector3 = Vector3.ZERO
+var last_hit: bool = false
 var _pending: bool = false
 @onready var actor: CharacterBody3D = get_parent()
 @onready var health = actor.get_node("Health")
@@ -61,13 +65,26 @@ func _physics_process(delta: float) -> void:
 		rune_queue.consume()
 	last_kind = kind
 	cooldown_remaining = TAG_COOLDOWN
-	# Aim from the eye View so a chase camera cannot fire from 4 m behind the caster.
 	var origin: Vector3 = aim.global_position
 	var direction: Vector3 = -aim.global_basis.z
 	var endpoint: Vector3 = origin + direction * QUERY_RANGE
 	var query := PhysicsRayQueryParameters3D.create(origin, endpoint, 3, [actor.get_rid()])
 	query.hit_from_inside = true
 	var hit: Dictionary = actor.get_world_3d().direct_space_state.intersect_ray(query)
+	var muzzle: Vector3 = aim.to_global(MUZZLE_LOCAL)
+	var near_query := PhysicsRayQueryParameters3D.create(origin, muzzle, 3, [actor.get_rid()])
+	near_query.hit_from_inside = true
+	var near_hit: Dictionary = actor.get_world_3d().direct_space_state.intersect_ray(near_query)
+	last_origin = muzzle
+	if not near_hit.is_empty():
+		hit = near_hit
+		last_origin = origin
+	else:
+		var aim_point: Vector3 = hit.position if not hit.is_empty() else endpoint
+		var muzzle_query := PhysicsRayQueryParameters3D.create(muzzle, aim_point + direction * 0.02, 3, [actor.get_rid()])
+		muzzle_query.hit_from_inside = true
+		hit = actor.get_world_3d().direct_space_state.intersect_ray(muzzle_query)
+	last_hit = not hit.is_empty()
 	var applied: float = 0.0
 	var damage: float = float(recipe.get("damage", TAG_DAMAGE))
 	if not hit.is_empty():
@@ -85,5 +102,7 @@ func reset_for_respawn() -> void:
 	_pending = false
 	cooldown_remaining = 0.0
 	last_kind = "tag"
+	last_origin = Vector3.ZERO
+	last_hit = false
 	rune_queue.clear()
 	combat_reset.emit()

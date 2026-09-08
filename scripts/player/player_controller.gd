@@ -8,6 +8,7 @@ extends CharacterBody3D
 @onready var view = $View
 @onready var posture = $Posture
 @onready var health = $Health
+@onready var knockback = $Knockback
 
 func _ready() -> void:
 	player_input.look_requested.connect(view.apply_look)
@@ -15,23 +16,31 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if health.is_dead:
-		velocity.x = 0.0
-		velocity.z = 0.0
-		velocity.y = 0.0 if is_on_floor() else velocity.y - gravity * delta
+		velocity.x = knockback.horizontal.x
+		velocity.z = knockback.horizontal.z
+		velocity.y = 0.0 if is_on_floor() and velocity.y <= 0.0 else velocity.y - gravity * delta
 		move_and_slide()
+		knockback.finish_step(self, delta)
 		return
 	if player_input.crouch_toggled():
 		posture.toggle()
 	var axis: Vector2 = player_input.movement_axis()
 	var direction: Vector3 = view.horizontal_basis() * Vector3(axis.x, 0.0, axis.y)
 	var speed: float = sprint_speed if player_input.sprint_held() else walk_speed
-	velocity.x = direction.x * speed
-	velocity.z = direction.z * speed
-	if is_on_floor():
+	velocity.x = direction.x * speed + knockback.horizontal.x
+	velocity.z = direction.z * speed + knockback.horizontal.z
+	if is_on_floor() and velocity.y <= 0.0:
 		velocity.y = jump_speed if player_input.jump_requested() else 0.0
 	else:
 		velocity.y -= gravity * delta
 	move_and_slide()
+	knockback.finish_step(self, delta)
 
 func _on_died() -> void:
 	player_input.set_capture(false)
+
+func apply_knockback(impulse: Vector3) -> void:
+	if not impulse.is_finite():
+		return
+	knockback.add_impulse(impulse)
+	velocity.y += impulse.y

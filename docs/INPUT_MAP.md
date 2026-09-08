@@ -27,3 +27,7 @@ FOV change or buffered jump yet. Jump launch speed 7 m/s, gravity 20 m/s². Thes
 baseline choices, not finalized movement balance.
 
 M04 debug-only: H = 25 self damage; J = 25 dummy damage. Requires captured controls and living player. No weapon raycast. Death prevents recapture.
+
+M05: primary_fire = left mouse. Central input owns firing; first click after release only captures.
+Ctrl+LMB is reserved for Link and suppressed. Combat rejects clicks during cooldown; does not buffer
+them or auto-fire while held. Death/focus/capture loss cancel pending shots before physics execution.

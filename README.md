@@ -1,68 +1,65 @@
-# WIZARDS! — M04 v0.4.0
-A first-person movement testbed for PC. Godot source project, not an executable or HTML game.
+# WIZARDS! — M05 v0.5.0
+PC Godot source project. Includes M01–M05: FPS movement, jump/sprint/crouch, health,
+Sniper Tag and knockback. Not an HTML game or exported executable.
 
-## Open and play
-1. Download the standard (non-.NET) Godot **4.5 stable** editor: https://godotengine.org/download/archive/4.5-stable/
-2. Extract this ZIP fully to a writable folder.
-3. In Godot Project Manager choose **Import**, select `project.godot`, then **Import & Edit**.
-4. Press **F6** only when testing an individual scene; press **F5** to launch the whole project.
-5. WASD moves; Space jumps; Ctrl+S toggles crouch; hold Shift to sprint; mouse looks; Escape releases the pointer; left click captures it again.
-6. Stop using F8 in the editor or close the running window.
+## Run
+1. Download the standard Godot **4.5 stable** editor:
+   https://godotengine.org/download/archive/4.5-stable/
+2. Extract this archive fully into a new writable folder. This is a complete project; do not overlay an older copy.
+3. Import `project.godot` in Godot Project Manager; choose Import & Edit.
+4. Press **F5**. Mouse and keyboard required. F8 stops the running scene.
 
-Renderer: Compatibility. Physics: 60 Hz. No add-ons, downloaded assets, .NET, or Blender required.
-The project pins an established engine version for reproducibility; this is not a claim that it is the latest release.
-Use a PC with keyboard and mouse. Mobile controls are outside M01.
+Renderer Compatibility; 60 Hz physics; no .NET, add-ons or external assets required.
+Godot 4.5 is pinned for reproducibility, not claimed to be the latest version.
 
-## What is included
-One 40 m graybox arena; floor, walls, blocks and low beam; one capsule player;
-eye-level FPS camera; normalized WASD movement; gravity and collision; capture/focus handling;
-a small headless integration test; project state, ADR, backlog and manual test plan.
-M01–M04 are implemented; combat, runes and broom follow later.
+## Controls
+| Input | Behavior |
+|---|---|
+| WASD / mouse | Move / aim in first person |
+| Space | Ground jump, fresh press |
+| Hold Shift | Sprint |
+| Ctrl+S | Toggle crouch, one toggle per press |
+| Left click | Sniper Tag when captured and alive |
+| Escape / click | Release / recapture pointer (recapture does not shoot) |
+| H / J | Temporary debug: 25 damage to self / dummy |
 
-## Tuning
-Select Player in `scenes/player/player.tscn`: Walk Speed defaults to 6 m/s, Sprint Speed to 9 m/s, Jump Speed to 7 m/s, Gravity to 20 m/s².
-Select View: mouse sensitivity defaults to 0.12 degrees/pixel; Invert Y is available.
-Camera3D: FOV 80 degrees. Baseline intentionally has immediate acceleration and stopping.
-This is temporary M01 movement, not the future momentum/crouch model.
+Aim at the orange dummy, then click. Tag deals **12 damage**, has a **2-second cooldown**,
+uses no mana, and has no damage falloff. Arena walls and blocks stop the ray.
+The physics ray is 1000 m long, covering the bounded arena; no literal infinite coordinate.
+Rapid clicks during cooldown are rejected, not queued for later. Hold does not auto-fire.
+The HUD shows readiness and hit damage. No tracer, wand mesh or sound added yet.
+Ctrl+LMB is reserved for future Link and does not fire Tag.
+
+Hits push the dummy in the shot direction. Horizontal push decays and collides with walls;
+player input does not erase external knockback. A lethal hit can still push the target.
+The dummy does not attack. Both actors have 100 HP. Nine full Tag hits kill the dummy;
+the last reports only HP actually removed. Dead targets take no further damage or impulse.
+At player death controls lock; **stop/run to reset**. Respawn is scheduled for M06.
+
+Crouch uses a 1 m capsule and .85 m eye; standing uses 1.8 m and 1.65 m. Eye height snaps
+with collider to avoid clipping under roofs. Blocked standing requires retry after moving clear.
+Ctrl+S reserves S from backward input while Ctrl is held. Crouch adds no speed penalty.
+Walk 6 m/s; sprint 9 m/s; jump launch 7 m/s; gravity 20 m/s². These remain tunable baselines.
 
 ## Verification
-See `docs/TEST_RESULTS.md`. Engine import and headless physics checks were run in Linux.
-Interactive camera feel, GPU rendering, focus behavior on your OS and the five-minute playtest
-remain unverified. M01 awaits those checks; no exported executable was tested.
+Godot 4.5 stable Linux headless: editor import and 62 checks pass across M01–M05 fixtures.
+No GPU rendering, camera comfort, target-PC mouse/focus, exported executable, or render-cap
+comparison is confirmed. See docs/TEST_RESULTS.md and docs/TEST_PLAN.md.
 
-## Run automated test
-Replace `godot` with your Godot executable path if it is not on PATH:
+Run from this project folder, replacing `godot` with your executable path:
 ```
 godot --headless --path . --editor --import --quit
 godot --headless --path . --script res://tests/m01_smoke.gd
 godot --headless --path . --script res://tests/m02_smoke.gd
 godot --headless --path . --script res://tests/m03_smoke.gd
 godot --headless --path . --script res://tests/m04_smoke.gd
+godot --headless --path . --script res://tests/m05_smoke.gd
 ```
-Expected: PASS lines, `M01 failures: 0` and `M02 failures: 0`, exit code 0.
+Each runner should report zero failures and exit 0. Manual testing remains necessary.
 
-## Continue development
-Read `docs/PROJECT_STATE.md`, `docs/ARCHITECTURE.md` and `docs/TEST_PLAN.md`.
-Return your OS, Godot version and any exact errors alongside test feedback.
-Next is M05 Sniper Tag and knockback after playtest feedback.
-
-## Version control
-This delivery includes source and a `git-baseline.bundle`, not editor caches.
-To reconstruct the recorded repository: `git clone git-baseline.bundle wizards-dev`.
-Alternatively use the extracted source directly and start your own Git repository.
-Do not combine two independent copies when editing. Commit each tested milestone.
-
-## M03 crouch
-Ctrl+S toggles once per chord press. Holding the chord does not repeat. S is reserved for crouch
-while Ctrl is held; ordinary S still moves backward. Collider height drops from 1.8 to 1.0 m,
-eye from 1.65 to 0.85 m. Eye snaps with collider to avoid clipping under an obstruction.
-Standing is rejected under a low ceiling; press the chord again after moving clear.
-Crouch itself does not change velocity or apply a speed penalty; standard movement/braking still
-operates. This is not the later slide/bunny-hop momentum system.
-
-## M04 health/damage testbed
-Player and orange dummy start at 100 HP. **H** damages the player by 25; **J** damages the dummy
-by 25, regardless of aim/range. These are temporary debug controls, not weapons. Holding a key
-should not repeatedly damage. HUD and overhead dummy text show HP/death. At zero HP the player
-loses controls. Stop and run again to reset. Respawn is M06; Sniper Tag/knockback is M05.
-Dead dummy remains collidable for now. No healing, scoring or death animation is implemented.
+## Continue
+Read docs/PROJECT_STATE.md first. Next milestone: **M06 death/respawn lifecycle**, after feedback.
+Round timer M07; then rune proof; then broom. Runes and broom are not implemented.
+Git baseline/history is included as git-baseline.bundle; reconstruct with:
+`git clone git-baseline.bundle wizards-dev`. Use either that clone or extracted source as your
+working copy, not two independently edited copies. Engine caches are excluded from the ZIP.

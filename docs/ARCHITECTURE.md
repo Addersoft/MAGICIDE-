@@ -28,3 +28,18 @@ Eye snaps with collider; movement/camera orientation owners remain unchanged. Qu
 changes occur in the physics callback. No animation or separate movement state machine added.
 
 M04 HealthComponent owns current HP and is_dead; apply_damage returns actual HP removed. Invalid/nonpositive inputs rejected. Lethal state commits before signals to prevent reentrant duplicate death. Per-node state, no shared resource HP. PlayerController disables input on died and blocks movement/actions while dead, retaining gravity. DamageTestbed is scene-local debug input/HUD glue; remove debug hotkeys when production controls replace them. Dummy StaticBody retains collision on death until lifecycle milestone.
+
+M05: CombatController receives primary_requested and resolves a pending request in physics. Cooldown
+is simulation seconds. Eye-origin ray excludes caster RID, checks layers 1|2, and stops at first body.
+No muzzle exists yet, so camera origin is the actual cast origin. Range 1000 m covers this arena;
+revisit range when map bounds expand to preserve no gameplay-range limit. No mana dependency.
+Accepted hit calls Health.apply_damage, then target.apply_knockback only if HP was actually removed.
+Shot feedback signal is presentation only. No timers/particles determine damage.
+
+KnockbackComponent owns horizontal external velocity and bounded linear decay; it never moves a body.
+PlayerController and DummyController remain their respective sole movement owners. They combine
+input/external velocity, integrate vertical impulses/gravity and call move_and_slide once per tick.
+Collision normals remove blocked external velocity after motion. Dead bodies can retain hit impulse.
+Dummy changed from StaticBody3D to CharacterBody3D because it now receives physical movement.
+Layer 1 = world; layer 2 = actors; actors use mask 3; attack ray uses mask 3 and excludes caster.
+PlayerPosture standing queries automatically inherit the actor mask and therefore include the dummy.

@@ -31,3 +31,15 @@ comparison remain pending. Test evidence does not establish full parkour momentu
 
 ## M04 v0.4.0
 Godot 4.5 stable Linux headless import exit 0. All prior 31 checks pass. M04 12 checks pass: actor initial/independent HP, invalid values, subtraction, dummy clamp/death label, actual overkill damage, reentrant single death, dead damage rejection, blocked recapture/movement/jump, death HUD. All runners exit 0. Total 43. Interactive key handling, rendering, camera comfort and frame-cap comparisons remain unverified.
+
+## M05 v0.5.0
+Godot 4.5 stable official 876b29033, Linux headless. Import exit 0, no parser errors.
+M01/M02/M03/M04: all 43 prior checks pass, all exit 0.
+M05: 19 checks pass, exit 0: LMB 12 damage, caster excluded, 2 s cooldown start, rapid requests
+rejected, dummy displacement/decay, cooldown persistence/expiry, wall occlusion/blocked-shot cooldown,
+recapture no-fire, Ctrl+LMB no-fire, capture-loss cancel, repeat damage, player horizontal/vertical
+impulse retention, crouch impulse retention, death cancel, boundary collision and blocked-impulse cleanup.
+Total: 62 assertions. M05 rerun after adding boundary fixture; both runs exited 0.
+Not tested: GPU output, manual camera/aim feel, target-PC focus handling, render-cap comparison,
+network behavior or executable export. The shot test dispatches mouse events to the input handler;
+it does not simulate a physical OS pointer or establish interactive graphics correctness.

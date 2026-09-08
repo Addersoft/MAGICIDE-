@@ -1,5 +1,6 @@
 extends Node
 ## Raw input ownership. No movement or camera transforms here.
+signal primary_requested
 signal look_requested(delta_pixels: Vector2)
 signal capture_changed(captured: bool)
 var controls_active: bool = false
@@ -33,6 +34,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not controls_active:
 		set_capture(true)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("primary_fire") and controls_active:
+		# Reserve Ctrl+LMB for future Link; it must not also fire Tag.
+		if not event.ctrl_pressed:
+			primary_requested.emit()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and controls_active:
 		if _discard_motion:

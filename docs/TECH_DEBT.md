@@ -1,9 +1,13 @@
 # Technical debt
-- Immediate horizontal velocity assignment: intentionally simple M01. It will overwrite external
-  impulses; replace with an approved acceleration/impulse model before crouch momentum/knockback.
-- Input is local, no tick command records. Revisit at multiplayer spike; do not claim prediction readiness.
-- Capture response has no live HUD status. Static instructions are sufficient for M01; review if confusing.
-- No graphical/OS playtest here. M01 acceptance remains pending until developer checks pass.
-- No persisted sensitivity preferences: inspector tuning only; add settings with later UI work.
-
-- M04 debug damage is direct local input, not a production attack or network authority. Replace fixture hotkeys at combat integration. Dead dummy collision persists until lifecycle design in M06.
+- Direct input velocity remains a simple M01 tuning model. M05 resolves external-impulse overwrite
+  with separate horizontal impulse state; advanced acceleration, slides and bunny-hop remain deferred.
+- Input and combat are local. Introduce tick-tagged requests/server validation during network spike;
+  do not claim prediction readiness.
+- Ray origin is FPS eye; no wand/muzzle exists. If a muzzle is later added, resolve near-cover aim
+  and obstruction before allowing muzzle presentation to diverge from gameplay origin.
+- 1000 m ray covers 40 m arena. When bounds expand, update query coverage; no range falloff intended.
+- H/J direct damage remains an explicit debug fixture; remove before public playtests as appropriate.
+- Dead dummy remains collidable. M06 will define corpse/respawn lifecycle and safe spawns.
+- No persistent sensitivity settings; inspector only. Eye crouch snaps for clearance safety.
+- No actual PC graphical/comfort/focus validation. Manual acceptance remains pending.
+- No audio/tracer/wand art for Tag; text feedback is the M05 presentation placeholder.

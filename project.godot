@@ -1,6 +1,6 @@
 config_version=5
 [application]
-config/name="WIZARDS! — M04 v0.4.0"
+config/name="WIZARDS! — M05 v0.5.0"
 run/main_scene="res://scenes/boot/main.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 [display]
@@ -58,4 +58,9 @@ test_hurt_player={
 test_hurt_dummy={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":74)]
+}
+
+primary_fire={
+"deadzone": 0.2,
+"events": [Object(InputEventMouseButton,"button_index":1)]
 }

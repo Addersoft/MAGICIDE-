@@ -43,3 +43,16 @@ Run tests/m03_smoke.gd as well as M01/M02. No future systems should mask a faile
 
 ## M04 manual acceptance
 Run tests/m04_smoke.gd. In F5 play: H once reduces your HP by 25, J once reduces dummy HP by 25. Hold each: no repeat. Four J presses mark dummy DEAD. Four H presses mark you DEAD and release capture; movement/jump/crouch/click cannot revive you. Stop/run restores both to 100. Confirm HUD readable and prior movement checks still pass. Debug damage ignores distance/aim by design; no Sniper Tag yet.
+
+## M05 acceptance
+Run tests/m05_smoke.gd and the earlier fixtures. Manual PC checks:
+- Aim at orange capsule: click removes 12 HP and visibly pushes it; subsequent shot ready after 2 s.
+- Rapid clicks/holding do not bypass cooldown. Hit HUD tracks actual damage; last lethal hit clamps.
+- Aim at wall/block: no dummy damage through it. Shot still starts cooldown. Shooting empty sky misses.
+- Escape then click: recapture only. Ctrl+click does not fire Tag. Dead player cannot fire.
+- Push dummy against boundary walls; no penetration, vibration or delayed push after collision.
+- Walk/jump/crouch/sprint while aiming: camera stays FPS and movement tests still pass.
+- Restart scene after death. No respawn or dummy AI is claimed in M05.
+- At 30/60/144 render caps with physics fixed at 60 Hz, compare cooldown and push distance.
+Likely failure points: eye-origin aiming near cover, narrow collider hit regions, controller/impulse
+mixing, OS mouse capture. Report exact reproduction, engine version, hardware and debugger output.

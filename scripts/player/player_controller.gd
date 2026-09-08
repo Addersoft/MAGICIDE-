@@ -1,9 +1,10 @@
 extends CharacterBody3D
 ## Sole velocity and move_and_slide owner. Delegates on-foot locomotion to ParkourMotor.
-@export var walk_speed: float = 6.0
-@export var sprint_speed: float = 9.0
-@export var jump_speed: float = 7.0
-@export var gravity: float = 20.0
+## Speeds tuned toward Mirror's Edge / TF2 Scout free-run feel.
+@export var walk_speed: float = 10.0
+@export var sprint_speed: float = 16.0
+@export var jump_speed: float = 9.0
+@export var gravity: float = 22.0
 @onready var player_input = $PlayerInput
 @onready var view = $View
 @onready var posture = $Posture
@@ -63,7 +64,6 @@ func _broom_physics(delta: float) -> void:
 	broom.update_visual(delta, axis)
 
 func _foot_physics(delta: float) -> void:
-	# Tap Ctrl (stationary) = crouch toggle. Hold Ctrl while moving = slide.
 	var crouch_tap: bool = player_input.crouch_toggled()
 	if crouch_tap and not posture.sliding:
 		posture.toggle()

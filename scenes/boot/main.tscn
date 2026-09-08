@@ -46,7 +46,7 @@ theme_override_colors/font_shadow_color=Color(0,0,0,1)
 theme_override_constants/shadow_offset_x=2
 theme_override_constants/shadow_offset_y=2
 theme_override_font_sizes/font_size=20
-text="WIZARDS!  /  P01 Parkour\nWASD  Move     Mouse  Look     Esc  Release     Click  Capture\nSpace  Jump / broom up     Hold Shift  Sprint / broom boost\nCtrl tap crouch     Ctrl hold slide     F  Broom     Q/E roll\n1  Kenaz     C  Clear     LMB  Tag/Cast"
+text="WIZARDS!  /  P01 Parkour\nWASD  Move     Mouse  Look     Esc  Release     Click  Capture\nSpace  Jump (works from sprint/slide/roll)     Hold Shift  Sprint / broom boost\nCtrl hold crouch     Ctrl+move slide     F  Broom     Q/E roll\nLMB  Tag (0.2s, buffered)     RMB  Ward     1 Kenaz     C Clear"
 [node name="Crosshair" type="Label" parent="HUD"]
 anchors_preset=8
 anchor_left=0.5

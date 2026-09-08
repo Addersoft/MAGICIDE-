@@ -1,11 +1,13 @@
 extends Node
-## Local attack authority. Shield (RMB) blocks LMB while held.
+## Combat never gates movement. Movement never gates combat.
+## Only RMB shield suppresses LMB while actually held.
 signal combat_reset
 signal shot_resolved(hit_position: Vector3, damage: float)
 signal cast_failed(reason: String)
 signal shield_changed(active: bool)
 const TAG_DAMAGE: float = 12.0
 const TAG_COOLDOWN: float = 0.2
+const FIRE_BUFFER: float = 0.18
 const QUERY_RANGE: float = 1000.0
 const KNOCKBACK_SPEED: float = 5.0
 const MUZZLE_LOCAL := Vector3(0.22, -0.23, -0.57)
@@ -14,7 +16,7 @@ var last_kind: String = "tag"
 var last_origin: Vector3 = Vector3.ZERO
 var last_hit: bool = false
 var shielding: bool = false
-var _pending: bool = false
+var _fire_buffer: float = 0.0
 @onready var actor: CharacterBody3D = get_parent()
 @onready var health = actor.get_node("Health")
 @onready var controls = actor.get_node("PlayerInput")
@@ -34,11 +36,12 @@ func _on_died() -> void:
 	_set_shield(false)
 
 func request_tag() -> void:
-	if health.is_dead or not controls.controls_active or cooldown_remaining > 0.0:
+	## Queue a shot. Cooldown does not eat the click — it fires as soon as ready.
+	if health.is_dead or not controls.controls_active:
 		return
 	if shielding:
 		return
-	_pending = true
+	_fire_buffer = FIRE_BUFFER
 
 func _insert(index: int) -> void:
 	if health.is_dead or not controls.controls_active:
@@ -51,7 +54,7 @@ func _clear() -> void:
 	rune_queue.clear()
 
 func _cancel() -> void:
-	_pending = false
+	_fire_buffer = 0.0
 
 func _capture_changed(captured: bool) -> void:
 	if not captured:
@@ -62,6 +65,8 @@ func _set_shield(on: bool) -> void:
 	if shielding == on:
 		return
 	shielding = on
+	if on:
+		_fire_buffer = 0.0
 	if ward != null and ward.has_method("set_active"):
 		ward.set_active(on)
 	shield_changed.emit(on)
@@ -70,11 +75,16 @@ func _physics_process(delta: float) -> void:
 	cooldown_remaining = maxf(0.0, cooldown_remaining - delta)
 	var want_shield: bool = controls.controls_active and not health.is_dead and controls.shield_held()
 	_set_shield(want_shield)
-	if not _pending:
+	# Physics-poll so HUD / unhandled routing cannot swallow LMB.
+	if controls.controls_active and not health.is_dead and not shielding and Input.is_action_just_pressed("primary_fire"):
+		_fire_buffer = FIRE_BUFFER
+	if _fire_buffer > 0.0:
+		_fire_buffer = maxf(0.0, _fire_buffer - delta)
+	if _fire_buffer <= 0.0:
 		return
-	_pending = false
 	if health.is_dead or not controls.controls_active or cooldown_remaining > 0.0 or shielding:
 		return
+	_fire_buffer = 0.0
 	var recipe: Dictionary = SpellCatalog.resolve(rune_queue.snapshot())
 	var kind: String = str(recipe.get("kind", "unsupported"))
 	if kind == "unsupported":
@@ -118,7 +128,7 @@ func _physics_process(delta: float) -> void:
 	shot_resolved.emit(endpoint, applied)
 
 func reset_for_respawn() -> void:
-	_pending = false
+	_fire_buffer = 0.0
 	cooldown_remaining = 0.0
 	last_kind = "tag"
 	last_origin = Vector3.ZERO

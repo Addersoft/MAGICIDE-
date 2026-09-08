@@ -3,7 +3,7 @@ extends Node
 @export_range(9.0, 30.0) var speed_cap: float = 24.0
 @export_range(35.0, 150.0) var ground_acceleration: float = 95.0
 @export_range(1.0, 34.0) var ground_braking: float = 28.0
-@export_range(1.0, 40.0) var air_acceleration: float = 22.0
+@export_range(1.0, 40.0) var air_acceleration: float = 30.0
 @export_range(0.1, 10.0) var slide_friction: float = 1.8
 @export_range(0.2, 0.8) var roll_duration: float = 0.48
 @export_range(8.0, 22.0) var roll_speed: float = 15.0
@@ -200,7 +200,9 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		coyote = maxf(0.0, coyote - delta)
 
 	if slide or (input.has_method("slide_held") and input.slide_held()):
-		if grounded and horizontal.length() > 3.5:
+		# Don't start a new slide on the same frame a jump is buffered — jump wins,
+		# then landing+Ctrl can slide again.
+		if grounded and horizontal.length() > 3.5 and jump_buffer <= 0.0:
 			if slide_time <= 0.0:
 				start_slide()
 			else:
@@ -253,8 +255,8 @@ func step(delta: float, crouch_pressed: bool) -> Vector3:
 		_jump_active = true
 		_finish_slide()
 
-	# Do not steal a jump into a mantle while sprinting/W-held.
-	if not jumped and not input.sprint_held() and wish_axis.y < -0.25 and wall_lock <= 0.0 and ((jump_edge and on_floor) or (not on_floor and vy < 1.0)):
+	# Never steal a buffered jump into a mantle.
+	if not jumped and jump_buffer <= 0.0 and not input.sprint_held() and wish_axis.y < -0.25 and wall_lock <= 0.0 and ((jump_edge and on_floor) or (not on_floor and vy < 1.0)):
 		var ledge: Dictionary = probe.ledge()
 		if not ledge.is_empty():
 			_ledge_target = ledge.target

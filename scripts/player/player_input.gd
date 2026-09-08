@@ -51,19 +51,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("primary_fire") and controls_active:
 		primary_requested.emit()
-		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_1") and controls_active:
 		rune_insert_requested.emit(0)
-		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_2") and controls_active:
 		rune_insert_requested.emit(1)
-		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_3") and controls_active:
 		rune_insert_requested.emit(2)
-		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("rune_clear") and controls_active:
 		rune_clear_requested.emit()
-		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and controls_active:
 		if _discard_motion:
 			_discard_motion = false
@@ -129,7 +124,6 @@ func roll_left_requested() -> bool:
 func roll_right_requested() -> bool:
 	return controls_active and Input.is_action_just_pressed("roll_right")
 
-## Held Q/E for broom aileron. −1 = Q (roll left), +1 = E (roll right).
 func roll_axis() -> float:
 	if not controls_active:
 		return 0.0

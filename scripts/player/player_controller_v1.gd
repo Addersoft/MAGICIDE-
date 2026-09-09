@@ -85,6 +85,5 @@ func reset_for_respawn(spawn: Transform3D) -> void:
 	view.reset_motion()
 	player_input.reset_for_respawn()
 	$Combat.reset_for_respawn()
-	$Runes.queue.clear()
 	health.reset_full()
 	reset_physics_interpolation()

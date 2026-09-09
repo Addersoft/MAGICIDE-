@@ -45,7 +45,7 @@ jump={
 }
 sprint={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194325)]
+"events": [Object(InputEventKey,"physical_keycode":4194328)]
 }
 
 crouch_modifier={
@@ -95,7 +95,7 @@ mount_broom={
 }
 parkour_slide={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194328)]
+"events": [Object(InputEventKey,"physical_keycode":4194325)]
 }
 # Intentionally unbound: Q/E are broom-only controls.
 parkour_dodge={

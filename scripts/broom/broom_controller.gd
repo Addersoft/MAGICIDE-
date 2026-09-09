@@ -1,202 +1,111 @@
 extends Node
-## Hover + boost. WASD follows look. Q/E bank/roll the broom (aileron).
+## Flight velocity/mode owner. PlayerController alone moves the collision body.
 signal mount_changed(mounted: bool)
 @export var hover_speed: float = 15.0
 @export var boost_speed: float = 40.0
-@export var climb_speed: float = 10.0
-@export var damp: float = 22.0
-@export var boost_damp: float = 14.0
-@export var retrograde: float = 2.2
-@export var altitude_lock: float = 36.0
-@export var visual_roll_degrees: float = 55.0
-@export var turn_bank_gain: float = 0.38
+@export var hover_acceleration: float = 35.0
+@export var boost_acceleration: float = 22.0
 var mounted: bool = false
 var boosting: bool = false
-var roll: float = 0.0
-var _look_yaw: float = 0.0
-var _yaw_rate: float = 0.0
-var _trail: GPUParticles3D
-var _trail_mat: ParticleProcessMaterial
-var _trail_draw: StandardMaterial3D
-@onready var actor: CharacterBody3D = get_parent()
-@onready var view: Node3D = actor.get_node("View")
-@onready var visual: Node3D = actor.get_node("BroomVisual")
-@onready var chase = actor.get_node("ChaseRig")
-@onready var fps: Camera3D = view.get_node("Camera3D")
+var flight_velocity: Vector3 = Vector3.ZERO
+var altitude_target: float = 0.0
+var roll_angle: float = 0.0
+var bank_angle: float = 0.0
+var notice: String = ""
+var _previous_yaw: float = 0.0
+@onready var actor = get_parent()
 
-const COLOR_IDLE := Color(1.0, 0.45, 0.12, 1.0)
-const COLOR_BOOST := Color(0.25, 0.55, 1.0, 1.0)
-
-func _ready() -> void:
-	_build_placeholder()
-	_build_trail()
-	visual.visible = false
-	if _trail:
-		_trail.emitting = false
-
-func mount() -> bool:
-	if mounted:
+func toggle() -> bool:
+	if actor.health.is_dead or not actor.player_input.controls_active or not actor.player_input.gameplay_enabled:
 		return false
-	mounted = true
-	boosting = false
-	_look_yaw = view.rotation.y
-	_yaw_rate = 0.0
-	roll = 0.0
-	actor.motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
-	actor.floor_snap_length = 0.0
-	visual.visible = true
-	if _trail:
-		_trail.emitting = true
-		_set_trail_color(COLOR_IDLE)
-	chase.capture_from_eye(fps)
-	mount_changed.emit(true)
+	if not actor.posture.can_stand():
+		notice = "Need standing clearance to mount or dismount"
+		return false
+	if not mounted and (actor.motor.state == "HANG" or actor.motor.state == "VAULT"):
+		notice = "Finish or drop from the ledge before mounting"
+		return false
+	if mounted:
+		mounted = false
+		boosting = false
+		var horizontal := Vector3(flight_velocity.x,0,flight_velocity.z)
+		actor.motor.reset()
+		actor.motor.horizontal = horizontal.limit_length(actor.motor.speed_cap)
+		actor.knockback.horizontal += horizontal-actor.motor.horizontal
+		actor.velocity.y = flight_velocity.y
+	else:
+		flight_velocity = actor.velocity-actor.knockback.horizontal
+		altitude_target = actor.global_position.y + (0.65 if actor.is_on_floor() else 0.0)
+		actor.posture.reset_standing()
+		actor.motor.reset()
+		roll_angle = 0.0
+		bank_angle = 0.0
+		_previous_yaw = actor.view.rotation.y
+		mounted = true
+	actor.player_input.sync_context()
+	notice = ""
+	mount_changed.emit(mounted)
 	return true
 
-func dismount() -> void:
-	if not mounted:
-		return
-	force_dismount()
+func step(delta: float) -> Vector3:
+	var controls = actor.player_input
+	var axis: Vector2 = controls.broom_axis()
+	var vertical: float = controls.broom_altitude()
+	var wants_boost: bool = controls.sprint_held()
+	if boosting and not wants_boost:
+		altitude_target = actor.global_position.y
+	boosting = wants_boost
+	var roll_input: float = controls.broom_roll()
+	if absf(roll_input)>0.01:
+		roll_angle = wrapf(roll_angle+roll_input*2.8*delta,-PI,PI)
+	else:
+		roll_angle = move_toward(roll_angle,0.0,1.4*delta)
+	var yaw_rate: float = angle_difference(_previous_yaw,actor.view.rotation.y)/delta
+	_previous_yaw = actor.view.rotation.y
+	bank_angle = lerpf(bank_angle,clampf(-yaw_rate*0.2,-0.5,0.5) if boosting else 0.0,1.0-exp(-6.0*delta))
+	if controls.broom_brake():
+		flight_velocity = Vector3.ZERO
+		altitude_target = actor.global_position.y
+		return flight_velocity
+	if boosting:
+		var forward: Vector3 = -actor.view.global_basis.z
+		var right: Vector3 = actor.view.global_basis.x.rotated(forward,-roll_angle)
+		# Shift alone gives forward thrust; S requests reverse thrust/braking.
+		var thrust: float = -axis.y if absf(axis.y)>0.01 else 1.0
+		var heading: Vector3 = forward*thrust + right*axis.x
+		if absf(vertical)>0.01:
+			heading.y = vertical*0.65
+		var desired: Vector3 = heading.normalized()*boost_speed
+		flight_velocity = flight_velocity.move_toward(desired,boost_acceleration*delta)
+		altitude_target = actor.global_position.y
+	else:
+		var wish: Vector3 = actor.view.horizontal_basis()*Vector3(axis.x,0,axis.y)
+		var flat := Vector3(flight_velocity.x,0,flight_velocity.z)
+		flat = flat.move_toward(wish*hover_speed,hover_acceleration*delta)
+		altitude_target += vertical*6.0*delta
+		var acceleration: float = (altitude_target-actor.global_position.y)*16.0-flight_velocity.y*8.0
+		var climb: float = clampf(flight_velocity.y+acceleration*delta,-8.0,8.0)
+		flight_velocity = Vector3(flat.x,climb,flat.z)
+		if flat.length()<=hover_speed+0.01:
+			flight_velocity = flight_velocity.limit_length(hover_speed)
+	return flight_velocity
 
-func force_dismount() -> void:
-	var was_mounted: bool = mounted
+func after_move() -> void:
+	for i in range(actor.get_slide_collision_count()):
+		var normal: Vector3 = actor.get_slide_collision(i).get_normal()
+		if flight_velocity.dot(normal)<0.0:
+			flight_velocity = flight_velocity.slide(normal)
+		if absf(normal.y)>0.5:
+			altitude_target = actor.global_position.y
+	if actor.is_on_floor() and flight_velocity.y<0.0:
+		altitude_target = actor.global_position.y
+		flight_velocity.y = 0.0
+
+func reset() -> void:
 	mounted = false
 	boosting = false
-	actor.motion_mode = CharacterBody3D.MOTION_MODE_GROUNDED
-	actor.floor_snap_length = 0.55
-	visual.visible = false
-	visual.rotation = Vector3.ZERO
-	roll = 0.0
-	_yaw_rate = 0.0
-	if _trail:
-		_trail.emitting = false
-	chase.release_to_eye(fps)
-	if was_mounted:
-		mount_changed.emit(false)
-
-func integrate(delta: float, current: Vector3, look_basis: Basis, axis: Vector2, vertical: float, knock_h: Vector3, boost: bool = false, aileron: float = 0.0) -> Vector3:
-	boosting = boost and mounted
-	var speed: float = boost_speed if boosting else hover_speed
-	var rate: float = boost_damp if boosting else damp
-	var look_yaw: float = look_basis.get_euler().y
-	var dyaw: float = wrapf(look_yaw - _look_yaw, -PI, PI)
-	_yaw_rate = dyaw / maxf(delta, 0.0001)
-	_look_yaw = look_yaw
-	var forward: Vector3 = -look_basis.z
-	var right: Vector3 = look_basis.x
-	right.y = 0.0
-	if right.length_squared() > 0.0001:
-		right = right.normalized()
-	else:
-		right = Vector3.RIGHT
-	# axis.y is negative when W is held — W along camera forward (pitch included).
-	var wish: Vector3 = (right * axis.x + forward * (-axis.y)) * speed
-	wish.y += vertical * climb_speed
-	# Q/E aileron: bank-slide in the roll direction (Q left, E right).
-	wish += right * aileron * speed * 0.45
-	var alpha: float = 1.0 - exp(-rate * delta)
-	var planar_cur := Vector3(current.x, 0.0, current.z)
-	var planar_wish := Vector3(wish.x, 0.0, wish.z)
-	if planar_wish.dot(planar_cur) < 0.0 and planar_cur.length() > 0.5:
-		alpha = 1.0 - exp(-rate * retrograde * delta)
-	var next := current.lerp(wish, alpha)
-	var pitch_drive: float = absf(forward.y * (-axis.y) * speed)
-	if absf(vertical) < 0.01 and pitch_drive < 0.5:
-		next.y = lerpf(current.y, 0.0, 1.0 - exp(-altitude_lock * delta))
-	next.x += knock_h.x
-	next.z += knock_h.z
-	return next
-
-func update_visual(delta: float, axis: Vector2, aileron: float = 0.0) -> void:
-	if not mounted:
-		return
-	var turn_bank: float = clampf(_yaw_rate * turn_bank_gain, -1.0, 1.0)
-	# Q/E dominate roll. A/D and mouse yaw add a little extra bank.
-	var stick: float = clampf(aileron + axis.x * 0.25 + turn_bank * 0.35, -1.0, 1.0)
-	var target_roll: float = stick * deg_to_rad(visual_roll_degrees)
-	roll = lerpf(roll, target_roll, 1.0 - exp(-14.0 * delta))
-	visual.rotation = Vector3(view.rotation.x, view.rotation.y, roll)
-	if _trail and _trail.emitting:
-		_set_trail_color(COLOR_BOOST if boosting else COLOR_IDLE)
-		_trail.amount = 48 if boosting else 28
-		_trail.lifetime = 0.55 if boosting else 0.4
-
-func _set_trail_color(c: Color) -> void:
-	if _trail_mat:
-		_trail_mat.color = c
-	if _trail_draw:
-		_trail_draw.albedo_color = c
-		_trail_draw.emission = c
-		_trail_draw.emission_energy_multiplier = 2.8 if boosting else 1.6
-
-func _build_trail() -> void:
-	_trail = GPUParticles3D.new()
-	_trail.name = "BoostTrail"
-	_trail.amount = 28
-	_trail.lifetime = 0.4
-	_trail.explosiveness = 0.0
-	_trail.randomness = 0.35
-	_trail.local_coords = false
-	_trail.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
-	_trail.emitting = false
-	_trail.position = Vector3(0.0, 0.42, 1.15)
-	_trail_mat = ParticleProcessMaterial.new()
-	_trail_mat.direction = Vector3(0, 0, 1)
-	_trail_mat.spread = 18.0
-	_trail_mat.initial_velocity_min = 1.5
-	_trail_mat.initial_velocity_max = 4.0
-	_trail_mat.gravity = Vector3(0, 0.4, 0)
-	_trail_mat.damping_min = 1.0
-	_trail_mat.damping_max = 3.0
-	_trail_mat.scale_min = 0.08
-	_trail_mat.scale_max = 0.22
-	_trail_mat.color = COLOR_IDLE
-	_trail.process_material = _trail_mat
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.06
-	mesh.height = 0.12
-	_trail_draw = StandardMaterial3D.new()
-	_trail_draw.albedo_color = COLOR_IDLE
-	_trail_draw.emission_enabled = true
-	_trail_draw.emission = COLOR_IDLE
-	_trail_draw.emission_energy_multiplier = 1.6
-	_trail_draw.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_trail_draw.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mesh.material = _trail_draw
-	_trail.draw_pass_1 = mesh
-	visual.add_child(_trail)
-
-func _build_placeholder() -> void:
-	var body := MeshInstance3D.new()
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.32
-	capsule.height = 1.55
-	body.mesh = capsule
-	body.position = Vector3(0.0, 0.95, 0.0)
-	var cloth := StandardMaterial3D.new()
-	cloth.albedo_color = Color(0.18, 0.42, 0.48, 1.0)
-	body.material_override = cloth
-	visual.add_child(body)
-	var stick := MeshInstance3D.new()
-	var cylinder := CylinderMesh.new()
-	cylinder.top_radius = 0.045
-	cylinder.bottom_radius = 0.055
-	cylinder.height = 1.7
-	stick.mesh = cylinder
-	stick.rotation_degrees = Vector3(90.0, 0.0, 0.0)
-	stick.position = Vector3(0.0, 0.42, 0.12)
-	var wood := StandardMaterial3D.new()
-	wood.albedo_color = Color(0.42, 0.26, 0.14, 1.0)
-	stick.material_override = wood
-	visual.add_child(stick)
-	var bristles := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.02
-	cone.bottom_radius = 0.18
-	cone.height = 0.45
-	bristles.mesh = cone
-	bristles.rotation_degrees = Vector3(90.0, 0.0, 0.0)
-	bristles.position = Vector3(0.0, 0.42, 0.95)
-	var straw := StandardMaterial3D.new()
-	straw.albedo_color = Color(0.72, 0.55, 0.28, 1.0)
-	bristles.material_override = straw
-	visual.add_child(bristles)
+	flight_velocity = Vector3.ZERO
+	altitude_target = actor.global_position.y
+	roll_angle = 0.0
+	bank_angle = 0.0
+	notice = ""
+	mount_changed.emit(false)

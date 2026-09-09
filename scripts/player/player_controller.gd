@@ -66,10 +66,12 @@ func _broom_physics(delta: float) -> void:
 	broom.update_visual(delta, axis, aileron)
 
 func _foot_physics(delta: float) -> void:
-	if motor.roll_time <= 0.0 and not posture.sliding:
-		var want_crouch: bool = player_input.crouch_held() and not player_input.slide_held()
+	# While not sliding and not in a special motor state, drive crouch from hold input.
+	# Slide is started inside the motor when crouch is held at speed (or dedicated slide key).
+	if motor.slide_time <= 0.0 and motor.roll_time <= 0.0 and not posture.sliding:
+		var want_crouch: bool = player_input.crouch_held()
 		posture.set_crouched(want_crouch)
-	var desired: Vector3 = motor.step(delta, false)
+	var desired: Vector3 = motor.step(delta, player_input.crouch_held())
 	velocity.x = desired.x + knockback.horizontal.x
 	velocity.y = desired.y
 	velocity.z = desired.z + knockback.horizontal.z

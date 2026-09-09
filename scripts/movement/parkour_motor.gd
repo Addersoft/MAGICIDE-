@@ -29,6 +29,7 @@ var _ledge_outside: Vector3
 var _jump_cut: bool = false
 var _jump_active: bool = false
 var _exit_direction: Vector3 = Vector3.FORWARD
+var roll_time: float = 0.0
 @onready var actor = get_parent()
 @onready var probe = actor.get_node("TraversalProbe")
 
@@ -50,6 +51,7 @@ func reset() -> void:
 	_jump_cut = false
 	_jump_active = false
 	_exit_direction = Vector3.FORWARD
+	roll_time = 0.0
 
 func accelerate(wish: Vector3, wish_speed: float, acceleration: float, delta: float) -> void:
 	if wish.is_zero_approx():
@@ -71,7 +73,7 @@ func _finish_slide() -> void:
 	if actor.posture.has_method("end_slide"):
 		actor.posture.end_slide()
 	elif _restore_standing and actor.posture.crouched and actor.posture.can_stand():
-		actor.posture.toggle()
+		actor.posture.set_crouched(false)
 	_restore_standing = false
 
 func start_slide() -> bool:
@@ -81,7 +83,7 @@ func start_slide() -> bool:
 	if actor.posture.has_method("begin_slide"):
 		actor.posture.begin_slide()
 	elif not actor.posture.crouched:
-		actor.posture.toggle()
+		actor.posture.set_crouched(true)
 	slide_time = 1.25
 	return true
 
@@ -98,12 +100,12 @@ func _traverse(delta: float, jump: bool, drop: bool) -> Vector3:
 	if not probe.standing_clear(_ledge_target):
 		state = "AIR"
 		_route.clear()
-		return Vector3(0,-2,0)
+		return Vector3(0, -2, 0)
 	if state == "HANG":
 		if drop or _traverse_time > 2.0:
 			state = "AIR"
 			wall_lock = 0.3
-			return Vector3(0,-2,0)
+			return Vector3(0, -2, 0)
 		if jump:
 			_begin_mantle(_ledge_target, _ledge_outside)
 		else:
@@ -111,7 +113,7 @@ func _traverse(delta: float, jump: bool, drop: bool) -> Vector3:
 	if _traverse_time > 0.8:
 		state = "AIR"
 		_route.clear()
-		return Vector3(0,-2,0)
+		return Vector3(0, -2, 0)
 	while not _route.is_empty() and actor.global_position.distance_to(_route[0]) < 0.055:
 		_route.pop_front()
 	if _route.is_empty():
@@ -123,128 +125,145 @@ func _traverse(delta: float, jump: bool, drop: bool) -> Vector3:
 func step(delta: float, crouch_pressed: bool) -> Vector3:
 	var input = actor.player_input
 	var jump: bool = input.jump_requested()
-	var slide: bool = input.slide_requested()
+	var slide_key: bool = input.slide_requested() or input.slide_held()
+	var want_crouch: bool = input.crouch_held()
 	var wish_axis: Vector2 = input.movement_axis()
-	var wish: Vector3 = actor.view.horizontal_basis() * Vector3(wish_axis.x,0,wish_axis.y)
+	var wish: Vector3 = actor.view.horizontal_basis() * Vector3(wish_axis.x, 0, wish_axis.y)
 	var grounded: bool = actor.is_on_floor() and actor.velocity.y <= 0.0
 	var vy: float = actor.velocity.y
-	wall_lock = maxf(0.0,wall_lock-delta)
-	dodge_cooldown = maxf(0.0,dodge_cooldown-delta)
-	jump_buffer = BUFFER if jump else maxf(0.0,jump_buffer-delta)
+	wall_lock = maxf(0.0, wall_lock - delta)
+	dodge_cooldown = maxf(0.0, dodge_cooldown - delta)
+	jump_buffer = BUFFER if jump else maxf(0.0, jump_buffer - delta)
 	if state == "HANG" or state == "VAULT":
 		if not input.controls_active:
 			state = "AIR"
 			_route.clear()
-			return Vector3(0,-2,0)
-		return _traverse(delta,jump,slide or crouch_pressed)
+			return Vector3(0, -2, 0)
+		return _traverse(delta, jump, slide_key or want_crouch)
 	if not input.controls_active:
 		horizontal = Vector3.ZERO
 		_finish_slide()
 		state = "GROUND" if grounded else "AIR"
-		return Vector3(0,0 if grounded else vy-actor.gravity*delta,0)
+		return Vector3(0, 0 if grounded else vy - actor.gravity * delta, 0)
 	if grounded:
-		coyote = BUFFER
+		coyote = COYOTE
 		wall_budget = 1.25
 		glide_budget = 1.2
 		_jump_cut = false
 		_jump_active = false
 	else:
-		coyote = maxf(0.0,coyote-delta)
-	if crouch_pressed and actor.posture.crouched or slide:
-		start_slide()
+		coyote = maxf(0.0, coyote - delta)
+
+	# Seamless slide: dedicated key OR (crouch held while moving fast)
+	if grounded and slide_time <= 0.0:
+		if slide_key or (want_crouch and horizontal.length() > 5.5):
+			start_slide()
+
 	if input.dodge_requested() and dodge_cooldown <= 0.0:
 		var dash: Vector3 = wish.normalized() if not wish.is_zero_approx() else -actor.view.horizontal_basis().z
 		horizontal = dash * 14.0
 		dodge_time = 0.18
 		dodge_cooldown = 1.2
 		_finish_slide()
+
 	var wall: Dictionary = probe.side_wall() if not grounded else {}
 	var wall_valid: bool = not wall.is_empty() and (wall_lock <= 0.0 or wall.normal.dot(_last_wall) < 0.5)
+
 	var jumped: bool = false
-	if wish_axis.y < -0.2 and wall_lock <= 0.0 and ((jump and grounded) or (not grounded and vy < 1.0)):
+
+	# Vault only when NOT pure jump intent (jump buffer has priority)
+	# This stops forward+jump from always becoming a mantle.
+	if not jump and wish_axis.y < -0.2 and wall_lock <= 0.0 and ((grounded) or (not grounded and vy < 1.0)):
 		var ledge: Dictionary = probe.ledge()
 		if not ledge.is_empty():
 			_ledge_target = ledge.target
 			_ledge_outside = ledge.outside
 			if grounded and ledge.height <= 1.35:
 				_begin_mantle(ledge.target, ledge.outside)
-				return _traverse(delta,false,false)
+				return _traverse(delta, false, false)
 			elif not grounded and ledge.height > 1.0:
 				state = "HANG"
 				_traverse_time = 0.0
-				_hang_target = ledge.outside - Vector3(0,1.3,0)
-				return _traverse(delta,false,false)
+				_hang_target = ledge.outside - Vector3(0, 1.3, 0)
+				return _traverse(delta, false, false)
+
 	if jump_buffer > 0.0 and (grounded or coyote > 0.0):
 		vy = actor.jump_speed
 		if slide_time > 0.0:
+			# Strong slide-jump
 			var launch: Vector3 = -actor.view.horizontal_basis().z
-			horizontal = launch * minf(16.0,maxf(12.0,horizontal.length()+2.0))
-			vy = clampf(actor.jump_speed + sin(actor.view.rotation.x)*3.0, 6.0,10.0)
+			horizontal = launch * minf(18.0, maxf(13.0, horizontal.length() + 3.0))
+			vy = clampf(actor.jump_speed + sin(actor.view.rotation.x) * 3.0, 7.0, 11.0)
 			_finish_slide()
 		jumped = true
 	elif jump_buffer > 0.0 and wall_valid:
 		var along: Vector3 = horizontal.slide(wall.normal)
 		if along.length() < 3.0:
 			along = -actor.view.horizontal_basis().z.slide(wall.normal) * 8.0
-		horizontal = (along + wall.normal*6.0).limit_length(speed_cap)
+		horizontal = (along + wall.normal * 6.0).limit_length(speed_cap)
 		vy = actor.jump_speed
 		_last_wall = wall.normal
 		wall_lock = 0.3
 		jumped = true
+
 	if jumped:
+		# Unfold on launch (keep short capsule only if ceiling blocks)
 		actor.posture.set_crouched(false)
 		jump_buffer = 0.0
 		coyote = 0.0
 		grounded = false
 		_jump_cut = false
 		_jump_active = true
+
 	if dodge_time > 0.0:
-		dodge_time = maxf(0.0,dodge_time-delta)
+		dodge_time = maxf(0.0, dodge_time - delta)
 		state = "DODGE"
 	elif grounded and slide_time > 0.0:
-		slide_time = maxf(0.0,slide_time-delta)
-		horizontal = horizontal.move_toward(Vector3.ZERO,slide_friction*delta)
+		slide_time = maxf(0.0, slide_time - delta)
+		horizontal = horizontal.move_toward(Vector3.ZERO, slide_friction * delta)
 		if not wish.is_zero_approx():
-			horizontal = horizontal.lerp(wish.normalized()*horizontal.length(),1.4*delta)
+			horizontal = horizontal.lerp(wish.normalized() * horizontal.length(), 1.4 * delta)
 		var slope: Vector3 = Vector3.DOWN.slide(actor.get_floor_normal())
-		horizontal += Vector3(slope.x,0,slope.z)*actor.gravity*delta
+		horizontal += Vector3(slope.x, 0, slope.z) * actor.gravity * delta
 		state = "SLIDE"
 		if slide_time <= 0.0 or horizontal.length() < 3.0:
 			_finish_slide()
 	elif not grounded and not jumped and wall_valid and wish_axis.y < -0.2 and horizontal.length() > 4.0 and wall_budget > 0.0:
 		state = "WALL RUN"
-		wall_budget = maxf(0.0,wall_budget-delta)
+		wall_budget = maxf(0.0, wall_budget - delta)
 		_last_wall = wall.normal
 		horizontal = horizontal.slide(wall.normal)
 		var along: Vector3 = horizontal.normalized()
-		accelerate(along,10.5,20.0,delta)
-		vy = clampf(vy,-1.5,2.5)
+		accelerate(along, 10.5, 20.0, delta)
+		vy = clampf(vy, -1.5, 2.5)
 	else:
 		state = "GROUND" if grounded else "AIR"
 		if grounded:
-			horizontal = horizontal.move_toward(Vector3.ZERO,ground_braking*delta)
-			accelerate(wish.normalized(),actor.sprint_speed if input.sprint_held() else actor.walk_speed,ground_acceleration,delta)
+			horizontal = horizontal.move_toward(Vector3.ZERO, ground_braking * delta)
+			accelerate(wish.normalized(), actor.sprint_speed if input.sprint_held() else actor.walk_speed, ground_acceleration, delta)
 		else:
-			accelerate(wish.normalized(),actor.sprint_speed if input.sprint_held() else actor.walk_speed,air_acceleration,delta)
+			accelerate(wish.normalized(), actor.sprint_speed if input.sprint_held() else actor.walk_speed, air_acceleration, delta)
+
 	if grounded:
 		vy = 0.0
 	elif not jumped:
 		var gravity_scale: float = 0.15 if state == "WALL RUN" else 1.0
 		if input.glide_held() and glide_budget > 0.0 and vy <= 0.0:
-			glide_budget = maxf(0.0,glide_budget-delta)
+			glide_budget = maxf(0.0, glide_budget - delta)
 			gravity_scale = 0.2
-			vy = maxf(vy,-2.5)
+			vy = maxf(vy, -2.5)
 			state = "GLIDE"
 		vy -= actor.gravity * gravity_scale * delta
 		if _jump_active and not input.jump_held() and vy > 3.2 and not _jump_cut:
 			vy = 3.2
 			_jump_cut = true
+
 	horizontal = horizontal.limit_length(speed_cap)
-	return Vector3(horizontal.x,vy,horizontal.z)
+	return Vector3(horizontal.x, vy, horizontal.z)
 
 func after_move() -> void:
 	for i in range(actor.get_slide_collision_count()):
 		var normal: Vector3 = actor.get_slide_collision(i).get_normal()
-		var planar := Vector3(normal.x,0,normal.z)
+		var planar := Vector3(normal.x, 0, normal.z)
 		if planar.length_squared() > 0.5 and horizontal.dot(planar) < 0.0:
 			horizontal = horizontal.slide(planar.normalized())

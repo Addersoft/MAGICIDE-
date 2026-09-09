@@ -91,12 +91,13 @@ rune_clear={
 }
 mount_broom={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":70)]
+"events": [Object(InputEventKey,"physical_keycode":66)]
 }
 parkour_slide={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":4194328)]
 }
+# Intentionally unbound: Q/E are broom-only controls.
 parkour_dodge={
 "deadzone": 0.2,
 "events": []
@@ -105,11 +106,15 @@ parkour_glide={
 "deadzone": 0.2,
 "events": []
 }
-roll_left={
+broom_roll_left={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":81)]
 }
-roll_right={
+broom_roll_right={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":69)]
+}
+broom_brake={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":88)]
 }
